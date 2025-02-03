@@ -18,6 +18,7 @@
     }
   },
   "scripts": {
+    "install": "cd playground && pnpm install",
     "clear": "shx rm -rf dist",
     "test": "echo \"\"",
     "build:cjs": "tsc --project ./tsconfig.build-cjs.json",
@@ -27,6 +28,7 @@
     "lint:ts": "tsc --project tsconfig.json",
     "lint:ecma": "eslint --fix",
     "lint": "run-p lint:*",
+    "dev": "cd playground && pnpm dev",
     "release": "pnpm publish . --tag latest --access public"
   },
   "devDependencies": {
