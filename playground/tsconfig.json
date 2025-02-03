@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2020",
+
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+
+    "paths": {
+      "@tapsioss/client-socket-manager": ["../src/index.ts"]
+    }
+  },
+  "include": ["client", "server"],
+  "exclude": ["node_modules", "dist"]
+}
