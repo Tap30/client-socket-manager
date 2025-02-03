@@ -1,3 +1,5 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable no-console */
 import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
@@ -13,7 +15,7 @@ const io = new Server(server, {
 });
 
 io.on("connection", socket => {
-  console.log("a user connected");
+  console.log("a socket connected", socket);
 });
 
 server.listen(3000, () => {
