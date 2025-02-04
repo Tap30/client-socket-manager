@@ -56,13 +56,13 @@ class ClientSocketManager {
     this._attachManagerEvents();
   }
 
-  private _attachPageEvents() {
+  private _attachPageEvents(): void {
     if (!isBrowser()) return;
 
     document.addEventListener("visibilitychange", this._handleVisibilityChange);
   }
 
-  private _attachSocketEvents() {
+  private _attachSocketEvents(): void {
     if (!this._socket) return;
 
     this._socket.on(
@@ -81,8 +81,8 @@ class ClientSocketManager {
     );
   }
 
-  private _attachManagerEvents() {
-    const manager = this.reconnectionManager;
+  private _attachManagerEvents(): void {
+    const manager = this._socket?.io;
 
     if (!manager) return;
 
@@ -106,7 +106,7 @@ class ClientSocketManager {
     );
   }
 
-  private _detachPageEvents() {
+  private _detachPageEvents(): void {
     if (!isBrowser()) return;
 
     document.removeEventListener(
@@ -115,15 +115,15 @@ class ClientSocketManager {
     );
   }
 
-  private _detachSocketEvents() {
+  private _detachSocketEvents(): void {
     this._socket?.off();
   }
 
-  private _detachManagerEvents() {
+  private _detachManagerEvents(): void {
     this._socket?.io.off();
   }
 
-  private _handleVisibilityChange() {
+  private _handleVisibilityChange(): void {
     const isPageVisible = document.visibilityState === "visible";
     const isPageHidden = document.visibilityState === "hidden";
 
@@ -136,42 +136,42 @@ class ClientSocketManager {
     }
   }
 
-  private _handleSocketConnection() {
+  private _handleSocketConnection(): void {
     this._inputListeners.onSocketConnection?.();
   }
 
-  private _handleSocketConnectionError(err: Error) {
+  private _handleSocketConnectionError(err: Error): void {
     this._inputListeners.onSocketConnectionError?.(err);
   }
 
   private _handleSocketDisconnection(
     reason: Socket.DisconnectReason,
     details?: DisconnectDescription,
-  ) {
+  ): void {
     this._inputListeners.onSocketDisconnection?.(reason, details);
   }
 
-  private _handleConnectionError(err: Error) {
+  private _handleConnectionError(err: Error): void {
     this._inputListeners.onConnectionError?.(err);
   }
 
-  private _handleServerPing() {
+  private _handleServerPing(): void {
     this._inputListeners.onServerPing?.();
   }
 
-  private _handleReconnecting(attempt: number) {
+  private _handleReconnecting(attempt: number): void {
     this._inputListeners.onReconnecting?.(attempt);
   }
 
-  private _handleReconnectingError(err: Error) {
+  private _handleReconnectingError(err: Error): void {
     this._inputListeners.onReconnectingError?.(err);
   }
 
-  private _handleReconnectingFailure() {
+  private _handleReconnectingFailure(): void {
     this._inputListeners.onReconnectionFailure?.();
   }
 
-  private _handleSuccessfulReconnection(attempt: number) {
+  private _handleSuccessfulReconnection(attempt: number): void {
     this._inputListeners.onSuccessfulReconnection?.(attempt);
   }
 
@@ -180,14 +180,14 @@ class ClientSocketManager {
    *
    * `null` when the socket is not connected.
    */
-  public get id() {
+  public get id(): string | null {
     return this._socket?.id ?? null;
   }
 
   /**
    * Whether the socket is currently connected to the server.
    */
-  public get connected() {
+  public get connected(): boolean {
     return this._socket?.connected ?? false;
   }
 
@@ -195,7 +195,7 @@ class ClientSocketManager {
    * Whether the connection state was recovered after a temporary disconnection.
    * In that case, any missed packets will be transmitted by the server.
    */
-  public get recovered() {
+  public get recovered(): boolean {
     return this._socket?.recovered ?? false;
   }
 
@@ -203,29 +203,15 @@ class ClientSocketManager {
    * Whether the Socket will try to reconnect when its Manager connects
    * or reconnects.
    */
-  public get autoReconnectable() {
+  public get autoReconnectable(): boolean {
     return this._socket?.active ?? false;
   }
 
   /**
    * The original socket.io reference.
    */
-  public get originalSocketReference() {
+  public get originalSocketReference(): Socket | null {
     return this._socket;
-  }
-
-  /**
-   * The underlying reconnection manager.
-   */
-  public get reconnectionManager() {
-    return this._socket?.io ?? null;
-  }
-
-  /**
-   * The Engine.IO client instance.
-   */
-  public get engine() {
-    return this._socket?.io.engine ?? null;
   }
 
   /**
@@ -240,7 +226,7 @@ class ClientSocketManager {
     channel: string,
     cb: SubscribeCallback,
     onSubscriptionComplete?: (channel: string) => void,
-  ) {
+  ): void {
     if (!this._socket) return;
 
     const listener: SubscribeCallback = (...args) => {
@@ -266,7 +252,7 @@ class ClientSocketManager {
    *
    * @param channel - The name of the channel whose listener should be deleted.
    */
-  public deleteChannelListener(channel: string) {
+  public deleteChannelListener(channel: string): void {
     this._channelSubscribersMap.delete(channel);
     this._socket?.off(channel);
   }
@@ -274,7 +260,7 @@ class ClientSocketManager {
   /**
    * Manually connects/reconnects the socket.
    */
-  public connect() {
+  public connect(): void {
     this._socket?.connect();
   }
 
@@ -285,7 +271,7 @@ class ClientSocketManager {
    * If this is the last active Socket instance of the Manager,
    * the low-level connection will be closed.
    */
-  public disconnect() {
+  public disconnect(): void {
     this._socket?.disconnect();
   }
 
@@ -293,7 +279,7 @@ class ClientSocketManager {
    * Disposes of the socket, manager, and engine, ensuring all connections are
    * closed and cleaned up.
    */
-  public dispose() {
+  public dispose(): void {
     this._detachPageEvents();
     this._detachSocketEvents();
     this._detachManagerEvents();
