@@ -217,17 +217,30 @@ class ClientSocketManager {
   /**
    * Subscribes to a specified channel with a callback function.
    * Ensures that only one listener exists per channel.
-   *
-   * @param channel - The name of the channel to subscribe to.
-   * @param cb - The callback function to invoke when a message is received on the channel.
-   * @param [onSubscriptionComplete] - Optional callback function to invoke when the subscription is complete.
    */
   public setChannelListener(
+    /**
+     * The name of the channel to subscribe to.
+     */
     channel: string,
+    /**
+     * The callback function to invoke when a message is received on the channel.
+     */
     cb: SubscribeCallback,
-    onSubscriptionComplete?: (channel: string) => void,
+    options?: {
+      /**
+       * The callback function to invoke when the subscription is complete.
+       */
+      onSubscriptionComplete?: (channel: string) => void;
+      /**
+       * The `AbortSignal` to unsubscribe the listener upon abortion.
+       */
+      signal?: AbortSignal;
+    },
   ): void {
     if (!this._socket) return;
+
+    const { onSubscriptionComplete, signal } = options ?? {};
 
     const listener: SubscribeCallback = (...args) => {
       if (!this._socket) return;
@@ -244,15 +257,28 @@ class ClientSocketManager {
     this._socket.on(channel, listener);
     this._channelSubscribersMap.set(channel, listener);
 
+    const unsubscribe = () => {
+      this.deleteChannelListener(channel);
+
+      signal?.removeEventListener("abort", unsubscribe);
+    };
+
+    signal?.addEventListener("abort", unsubscribe);
+
+    if (signal?.aborted) unsubscribe();
+
     onSubscriptionComplete?.(channel);
   }
 
   /**
    * Deletes the listener for a specified channel.
-   *
-   * @param channel - The name of the channel whose listener should be deleted.
    */
-  public deleteChannelListener(channel: string): void {
+  public deleteChannelListener(
+    /**
+     * The name of the channel whose listener should be deleted.
+     */
+    channel: string,
+  ): void {
     this._channelSubscribersMap.delete(channel);
     this._socket?.off(channel);
   }
