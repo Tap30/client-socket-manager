@@ -1,5 +1,6 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable no-console */
+
 import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
@@ -8,6 +9,7 @@ const app = express();
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 const server = createServer(app);
 const io = new Server(server, {
+  cors: { origin: "*" },
   allowEIO3: true,
   maxHttpBufferSize: 1e8,
   httpCompression: false,
@@ -15,7 +17,7 @@ const io = new Server(server, {
 });
 
 io.on("connection", socket => {
-  console.log("a socket connected", socket);
+  console.log("a socket connected", socket.id);
 });
 
 server.listen(3000, () => {
