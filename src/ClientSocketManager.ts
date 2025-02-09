@@ -1,15 +1,21 @@
 import { io, type Socket } from "socket.io-client";
-import type { DisconnectDescription } from "socket.io-client/build/esm/socket";
 import { ManagerReservedEvents, SocketReservedEvents } from "./constants.ts";
 import type {
   ClientSocketManagerListenerOptions,
   ClientSocketManagerOptions,
+  DefaultEventsMap,
+  EventNames,
+  EventParams,
+  EventsMap,
   SubscribeCallback,
 } from "./types.ts";
-import { isBrowser } from "./utils.ts";
+import { assertCallbackType, isBrowser } from "./utils.ts";
 
-class ClientSocketManager {
-  private _socket: Socket | null = null;
+class ClientSocketManager<
+  ListenEvents extends EventsMap = DefaultEventsMap,
+  EmitEvents extends EventsMap = ListenEvents,
+> {
+  private _socket: Socket<ListenEvents, EmitEvents> | null = null;
 
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
   private _channelSubscribersMap = new Map<string, SubscribeCallback>();
@@ -36,19 +42,6 @@ class ClientSocketManager {
       console.error("**HERE**", err);
     }
 
-    this._handleSocketConnection = this._handleSocketConnection.bind(this);
-    this._handleSocketConnectionError =
-      this._handleSocketConnectionError.bind(this);
-    this._handleSocketDisconnection =
-      this._handleSocketDisconnection.bind(this);
-    this._handleConnectionError = this._handleConnectionError.bind(this);
-    this._handleServerPing = this._handleServerPing.bind(this);
-    this._handleReconnecting = this._handleReconnecting.bind(this);
-    this._handleReconnectingError = this._handleReconnectingError.bind(this);
-    this._handleReconnectingFailure =
-      this._handleReconnectingFailure.bind(this);
-    this._handleSuccessfulReconnection =
-      this._handleSuccessfulReconnection.bind(this);
     this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
 
     this._attachPageEvents();
@@ -65,20 +58,29 @@ class ClientSocketManager {
   private _attachSocketEvents(): void {
     if (!this._socket) return;
 
-    this._socket.on(
-      SocketReservedEvents.CONNECTION,
-      this._handleSocketConnection,
-    );
+    const { onSocketConnection, onSocketConnectionError } =
+      this._inputListeners;
 
-    this._socket.on(
-      SocketReservedEvents.CONNECTION_ERROR,
-      this._handleSocketConnectionError,
-    );
+    if (onSocketConnection) {
+      this._socket.on(SocketReservedEvents.CONNECTION, onSocketConnection);
+    }
 
-    this._socket.on(
-      SocketReservedEvents.DISCONNECTION,
-      this._handleSocketDisconnection,
-    );
+    if (onSocketConnectionError) {
+      this._socket.on(
+        SocketReservedEvents.CONNECTION_ERROR,
+        onSocketConnectionError,
+      );
+    }
+
+    this._socket.on(SocketReservedEvents.DISCONNECTION, (reason, details) => {
+      this._inputListeners.onSocketDisconnection?.(reason, details);
+
+      if (!this.autoReconnectable) {
+        if (reason === "io server disconnect") {
+          this.connect();
+        }
+      }
+    });
   }
 
   private _attachManagerEvents(): void {
@@ -86,24 +88,44 @@ class ClientSocketManager {
 
     if (!manager) return;
 
-    manager.on(
-      ManagerReservedEvents.CONNECTION_ERROR,
-      this._handleConnectionError,
-    );
-    manager.on(ManagerReservedEvents.SERVER_PING, this._handleServerPing);
-    manager.on(ManagerReservedEvents.RECONNECTING, this._handleReconnecting);
-    manager.on(
-      ManagerReservedEvents.RECONNECTING_ERROR,
-      this._handleReconnectingError,
-    );
-    manager.on(
-      ManagerReservedEvents.RECONNECTION_FAILURE,
-      this._handleReconnectingFailure,
-    );
-    manager.on(
-      ManagerReservedEvents.SUCCESSFUL_RECONNECTION,
-      this._handleSuccessfulReconnection,
-    );
+    const {
+      onServerPing,
+      onConnectionError,
+      onReconnecting,
+      onReconnectingError,
+      onReconnectionFailure,
+      onSuccessfulReconnection,
+    } = this._inputListeners;
+
+    if (onConnectionError) {
+      manager.on(ManagerReservedEvents.CONNECTION_ERROR, onConnectionError);
+    }
+
+    if (onServerPing) {
+      manager.on(ManagerReservedEvents.SERVER_PING, onServerPing);
+    }
+
+    if (onReconnecting) {
+      manager.on(ManagerReservedEvents.RECONNECTING, onReconnecting);
+    }
+
+    if (onReconnectingError) {
+      manager.on(ManagerReservedEvents.RECONNECTING_ERROR, onReconnectingError);
+    }
+
+    if (onReconnectionFailure) {
+      manager.on(
+        ManagerReservedEvents.RECONNECTION_FAILURE,
+        onReconnectionFailure,
+      );
+    }
+
+    if (onSuccessfulReconnection) {
+      manager.on(
+        ManagerReservedEvents.SUCCESSFUL_RECONNECTION,
+        onSuccessfulReconnection,
+      );
+    }
   }
 
   private _detachPageEvents(): void {
@@ -131,48 +153,25 @@ class ClientSocketManager {
 
     if (isPageVisible) {
       this._inputListeners.onVisiblePage?.();
+
+      if (!this.connected) this.connect();
     } else {
       this._inputListeners.onHiddenPage?.();
+
+      this.disconnect();
     }
   }
 
-  private _handleSocketConnection(): void {
-    this._inputListeners.onSocketConnection?.();
-  }
+  /**
+   * Emits an event to the socket identified by the channel name.
+   */
+  public emit<Ev extends EventNames<EmitEvents>>(
+    channel: Ev,
+    ...args: EventParams<EmitEvents, Ev>
+  ) {
+    if (!this._socket) return;
 
-  private _handleSocketConnectionError(err: Error): void {
-    this._inputListeners.onSocketConnectionError?.(err);
-  }
-
-  private _handleSocketDisconnection(
-    reason: Socket.DisconnectReason,
-    details?: DisconnectDescription,
-  ): void {
-    this._inputListeners.onSocketDisconnection?.(reason, details);
-  }
-
-  private _handleConnectionError(err: Error): void {
-    this._inputListeners.onConnectionError?.(err);
-  }
-
-  private _handleServerPing(): void {
-    this._inputListeners.onServerPing?.();
-  }
-
-  private _handleReconnecting(attempt: number): void {
-    this._inputListeners.onReconnecting?.(attempt);
-  }
-
-  private _handleReconnectingError(err: Error): void {
-    this._inputListeners.onReconnectingError?.(err);
-  }
-
-  private _handleReconnectingFailure(): void {
-    this._inputListeners.onReconnectionFailure?.();
-  }
-
-  private _handleSuccessfulReconnection(attempt: number): void {
-    this._inputListeners.onSuccessfulReconnection?.(attempt);
+    this._socket.emit.apply(this._socket, [channel, ...args]);
   }
 
   /**
@@ -218,15 +217,15 @@ class ClientSocketManager {
    * Subscribes to a specified channel with a callback function.
    * Ensures that only one listener exists per channel.
    */
-  public setChannelListener(
+  public setChannelListener<Ev extends EventNames<ListenEvents>>(
     /**
      * The name of the channel to subscribe to.
      */
-    channel: string,
+    channel: Ev,
     /**
      * The callback function to invoke when a message is received on the channel.
      */
-    cb: SubscribeCallback,
+    cb: ListenEvents[Ev],
     options?: {
       /**
        * The callback function to invoke when the subscription is complete.
@@ -240,6 +239,11 @@ class ClientSocketManager {
   ): void {
     if (!this._socket) return;
 
+    assertCallbackType(
+      cb,
+      `Expected a valid callback function. received \`${typeof cb}\`.`,
+    );
+
     const { onSubscriptionComplete, signal } = options ?? {};
 
     const listener: SubscribeCallback = (...args) => {
@@ -247,14 +251,16 @@ class ClientSocketManager {
 
       this._inputListeners.onAnySubscribedMessageReceived?.(channel, args);
 
-      cb.apply(this, args);
+      (cb as SubscribeCallback).apply(this, args);
     };
 
     if (this._channelSubscribersMap.has(channel)) {
-      this._socket.off(channel, this._channelSubscribersMap.get(channel));
+      const subscriber = this._channelSubscribersMap.get(channel)!;
+
+      this._socket.off(channel, subscriber as ListenEvents[Ev]);
     }
 
-    this._socket.on(channel, listener);
+    this._socket.on(channel, listener as ListenEvents[Ev]);
     this._channelSubscribersMap.set(channel, listener);
 
     const unsubscribe = () => {
@@ -310,7 +316,7 @@ class ClientSocketManager {
     this._detachSocketEvents();
     this._detachManagerEvents();
 
-    this._socket?.disconnect();
+    this.disconnect();
     this._socket?.io.engine.close();
 
     this._socket = null;

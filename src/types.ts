@@ -4,12 +4,21 @@
 import type { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import type { DisconnectDescription } from "socket.io-client/build/esm/socket";
 
+export type SubscribeCallback = (...args: any[]) => void;
+
+export type EventsMap = Record<string, any>;
+export type DefaultEventsMap = Record<string, SubscribeCallback>;
+
+export type EventNames<Map extends EventsMap> = keyof Map & string;
+export type EventParams<
+  Map extends EventsMap,
+  Ev extends EventNames<Map>,
+> = Parameters<Map[Ev]>;
+
 type OverrideMembers<
   Origin extends Record<PropertyKey, any>,
   Destination extends Record<PropertyKey, any>,
 > = Omit<Origin, keyof Destination> & Destination;
-
-export type SubscribeCallback = (...args: any[]) => void;
 
 export type ClientSocketManagerListenerOptions = {
   /**
