@@ -119,17 +119,10 @@ export type ClientSocketManagerOptions = OverrideMembers<
      * @default 2000
      */
     reconnectionDelayMax: number;
-    /**
-     * Whether to include credentials (cookies, authorization headers, TLS
-     * client certificates, etc.) with cross-origin XHR polling requests.
-     *
-     * @default true
-     */
-    withCredentials?: boolean;
   }
 > & {
   /**
    * Handlers for various events.
    */
-  eventHandlers: ClientSocketManagerListenerOptions;
+  eventHandlers: Partial<ClientSocketManagerListenerOptions>;
 };
