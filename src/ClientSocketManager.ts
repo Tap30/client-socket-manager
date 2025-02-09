@@ -39,7 +39,12 @@ class ClientSocketManager<
         reconnectionDelayMax,
       });
     } catch (err) {
-      console.error("**HERE**", err);
+      // eslint-disable-next-line no-console
+      console.error("Failed to initialize socket connection", {
+        uri,
+        path,
+        err,
+      });
     }
 
     this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
