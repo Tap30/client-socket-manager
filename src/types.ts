@@ -101,13 +101,6 @@ export type ClientSocketManagerOptions = OverrideMembers<
   ManagerOptions & SocketOptions,
   {
     /**
-   * The path to get our client file from, in the case of the server
-   * serving it.
-
-   * @default '/socket.io'
-   */
-    path: string;
-    /**
      * The time delay in milliseconds between reconnection attempts.
      *
      * @default 500
