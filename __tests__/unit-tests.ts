@@ -173,8 +173,8 @@ describe("ClientSocketManager: unit tests", () => {
 
   it("should receive a message", async () => {
     const connectResolver = createPromiseResolvers();
-    const messageResolver = createPromiseResolvers();
-    const anyMessageResolver = createPromiseResolvers();
+    const messageResolver = createPromiseResolvers<string>();
+    const anyMessageResolver = createPromiseResolvers<[string, string[]]>();
 
     const serverChannel = "server/message";
     const serverMessage = "Hello from the server!";
@@ -185,10 +185,7 @@ describe("ClientSocketManager: unit tests", () => {
           connectResolver.resolve();
         },
         onAnySubscribedMessageReceived(channel, received) {
-          anyMessageResolver.resolve();
-
-          expect(channel).toBe(serverChannel);
-          expect(received).toEqual([serverMessage]);
+          anyMessageResolver.resolve([channel, received as string[]]);
         },
       },
     });
@@ -198,19 +195,26 @@ describe("ClientSocketManager: unit tests", () => {
     expect(socketManager.connected).toBe(true);
 
     socketManager.setChannelListener(serverChannel, msg => {
-      messageResolver.resolve();
-
-      expect(msg).toBe(serverMessage);
+      messageResolver.resolve(msg as string);
     });
 
     socketServer.emit(serverChannel, serverMessage);
 
-    await Promise.all([messageResolver.promise, anyMessageResolver.promise]);
+    const [message, anyMessage] = await Promise.all([
+      messageResolver.promise,
+      anyMessageResolver.promise,
+    ]);
+
+    const [channel, received] = anyMessage;
+
+    expect(message).toBe(serverMessage);
+    expect(channel).toBe(serverChannel);
+    expect(received).toEqual([serverMessage]);
   });
 
   it("should send a message", async () => {
     const connectResolver = createPromiseResolvers();
-    const messageResolver = createPromiseResolvers();
+    const messageResolver = createPromiseResolvers<string>();
 
     const serverChannel = "server/message";
     const clientMessage = "Hello from the client!";
@@ -233,13 +237,13 @@ describe("ClientSocketManager: unit tests", () => {
     expect(clientSocket).toBeDefined();
 
     clientSocket!.on(serverChannel, msg => {
-      messageResolver.resolve();
-
-      expect(msg).toBe(clientMessage);
+      messageResolver.resolve(msg as string);
     });
 
     socketManager.emit(serverChannel, clientMessage);
 
-    await messageResolver.promise;
+    const message = await messageResolver.promise;
+
+    expect(message).toBe(clientMessage);
   });
 });
