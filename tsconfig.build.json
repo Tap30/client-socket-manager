@@ -8,5 +8,6 @@
     "incremental": true,
     "noEmitOnError": true
   },
+  "include": ["src"],
   "exclude": ["**/*.test.ts", "playground", "__tests__"]
 }
