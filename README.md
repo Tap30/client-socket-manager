@@ -110,7 +110,7 @@ The original [Socket](https://socket.io/docs/v4/client-api/#socket) reference.
 
 ### Methods:
 
-#### emit:
+#### `emit`:
 
 ```ts
 emit<Ev extends EventNames<EmitEvents>>(
@@ -126,7 +126,7 @@ Emits an event to the socket identified by the channel name.
 - `channel`: The name of the channel to emit the event to.
 - `args`: The arguments to pass with the event.
 
-#### setChannelListener:
+#### `setChannelListener`:
 
 ```ts
 setChannelListener<Ev extends EventNames<ListenEvents>>(
@@ -149,7 +149,7 @@ Subscribes to a specified channel with a callback function. Ensures that only on
   - `onSubscriptionComplete`: The callback function to invoke when the subscription is complete.
   - `signal`: The `AbortSignal` to unsubscribe the listener upon abortion.
   
-#### deleteChannelListener:
+#### `deleteChannelListener`:
 
 ```ts
 deleteChannelListener(channel: string): void;
@@ -161,7 +161,7 @@ Deletes the listener for a specified channel.
 
 - `channel`: The name of the channel whose listener should be deleted.
 
-#### connect:
+#### `connect`:
 
 ```ts
 connect(): void;
@@ -169,7 +169,7 @@ connect(): void;
 
 Manually connects/reconnects the socket.
 
-#### disconnect:
+#### `disconnect`:
 
 ```ts
 disconnect(): void;
@@ -177,7 +177,7 @@ disconnect(): void;
 
 Manually disconnects the socket. In that case, the socket will not try to reconnect. If this is the last active Socket instance of the Manager, the low-level connection will be closed.
 
-#### dispose:
+#### `dispose`:
 
 ```ts
 dispose(): void;
