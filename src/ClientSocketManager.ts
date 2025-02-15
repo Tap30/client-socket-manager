@@ -176,7 +176,7 @@ class ClientSocketManager<
   ) {
     if (!this._socket) return;
 
-    this._socket.emit.apply(this._socket, [channel, ...args]);
+    this._socket.emit(channel, ...args);
   }
 
   /**
@@ -246,7 +246,7 @@ class ClientSocketManager<
 
     assertCallbackType(
       cb,
-      `Expected a valid callback function. received \`${typeof cb}\`.`,
+      `Expected a valid callback function. Received \`${typeof cb}\`.`,
     );
 
     const { onSubscriptionComplete, signal } = options ?? {};
