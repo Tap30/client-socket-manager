@@ -8,5 +8,5 @@
     "incremental": true,
     "noEmitOnError": true
   },
-  "exclude": ["**/*.test.ts", "playground"]
+  "exclude": ["**/*.test.ts", "playground", "__tests__"]
 }

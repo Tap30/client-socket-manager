@@ -27,10 +27,7 @@
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "importHelpers": true,
-
-    "baseUrl": "."
+    "useDefineForClassFields": false
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist"]

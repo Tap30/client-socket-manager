@@ -1,6 +1,7 @@
 import jsLint from "@eslint/js";
 import commentsPlugin from "eslint-plugin-eslint-comments";
 import importPlugin from "eslint-plugin-import";
+import jestPlugin from "eslint-plugin-jest";
 import prettierRecommendedConfig from "eslint-plugin-prettier/recommended";
 import { config, configs as tsLintConfigs } from "typescript-eslint";
 
@@ -11,7 +12,6 @@ export default config(
   importPlugin.flatConfigs.typescript,
   prettierRecommendedConfig,
   {
-    ignores: ["**/*.test.ts"],
     files: ["*.ts"],
   },
   {
@@ -24,6 +24,13 @@ export default config(
         },
         sourceType: "module",
       },
+    },
+  },
+  {
+    files: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+    extends: [jestPlugin.configs["flat/recommended"]],
+    rules: {
+      "jest/prefer-importing-jest-globals": "error",
     },
   },
   {
