@@ -104,10 +104,6 @@ Whether the connection state was recovered after a temporary disconnection.
 
 Whether the Socket will try to reconnect when its Manager connects or reconnects.
 
-#### `originalSocketReference: Socket | null`
-
-The original [Socket](https://socket.io/docs/v4/client-api/#socket) reference.
-
 ### Methods:
 
 #### `emit`:

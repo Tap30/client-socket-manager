@@ -212,13 +212,6 @@ class ClientSocketManager<
   }
 
   /**
-   * The original socket.io reference.
-   */
-  public get originalSocketReference(): Socket | null {
-    return this._socket;
-  }
-
-  /**
    * Subscribes to a specified channel with a callback function.
    * Ensures that only one listener exists per channel.
    */
