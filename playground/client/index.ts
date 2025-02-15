@@ -89,6 +89,19 @@ const createDisposeBtn = () => {
   return button;
 };
 
+const createSendMessageBtn = () => {
+  const button = createButton("send message");
+
+  button.addEventListener("click", () => {
+    socketManager.emit("message", "Hello from the client!");
+  });
+
+  document.body.append(button);
+
+  return button;
+};
+
 createDisconnectBtn();
 createReconnectBtn();
 createDisposeBtn();
+createSendMessageBtn();
