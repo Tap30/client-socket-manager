@@ -20,7 +20,7 @@
     }
   },
   "scripts": {
-    "install": "cd playground && pnpm install",
+    "postinstall": "cd playground && pnpm install",
     "clear": "shx rm -rf dist",
     "test": "jest",
     "build:cjs": "tsc --project ./tsconfig.build-cjs.json",
