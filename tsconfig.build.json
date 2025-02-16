@@ -3,11 +3,10 @@
   "compilerOptions": {
     "target": "ES2018",
     "outDir": "dist",
+    "jsx": "react-jsx",
     "noEmit": false,
     "declaration": true,
     "incremental": true,
     "noEmitOnError": true
-  },
-  "include": ["src"],
-  "exclude": ["**/*.test.ts", "playground", "__tests__"]
+  }
 }

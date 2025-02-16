@@ -3,6 +3,9 @@ import commentsPlugin from "eslint-plugin-eslint-comments";
 import importPlugin from "eslint-plugin-import";
 import jestPlugin from "eslint-plugin-jest";
 import prettierRecommendedConfig from "eslint-plugin-prettier/recommended";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
 import { config, configs as tsLintConfigs } from "typescript-eslint";
 
 export default config(
@@ -12,7 +15,7 @@ export default config(
   importPlugin.flatConfigs.typescript,
   prettierRecommendedConfig,
   {
-    files: ["*.ts"],
+    files: ["*.ts", "*.tsx"],
   },
   {
     languageOptions: {
@@ -35,9 +38,20 @@ export default config(
   },
   {
     plugins: {
+      react,
       "eslint-comments": commentsPlugin,
+      "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
     },
     rules: {
+      ...react.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
+      "react/prop-types": "off",
+      "react/react-in-jsx-scope": "off",
       "eslint-comments/disable-enable-pair": "error",
       "eslint-comments/no-aggregating-enable": "error",
       "eslint-comments/no-duplicate-disable": "error",

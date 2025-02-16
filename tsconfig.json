@@ -27,7 +27,19 @@
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+
+    "paths": {
+      // Core package
+      "@tapsioss/client-socket-manager": [
+        "./packages/core/dist/esm",
+        "./packages/core/src"
+      ],
+      "@tapsioss/client-socket-manager/*": [
+        "./packages/core/dist/esm/*",
+        "./packages/core/src/*"
+      ]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist"]
