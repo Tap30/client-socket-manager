@@ -38,7 +38,9 @@
       "@tapsioss/client-socket-manager/*": [
         "./packages/core/dist/esm/*",
         "./packages/core/src/*"
-      ]
+      ],
+      // Test helpers package
+      "@repo/test-helpers": ["./test-helpers/src"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
