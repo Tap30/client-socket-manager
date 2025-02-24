@@ -67,18 +67,21 @@ class ClientSocketManager<
       this._inputListeners;
 
     if (onSocketConnection) {
-      this._socket.on(SocketReservedEvents.CONNECTION, onSocketConnection);
+      this._socket.on(
+        SocketReservedEvents.CONNECTION,
+        onSocketConnection.bind(this),
+      );
     }
 
     if (onSocketConnectionError) {
       this._socket.on(
         SocketReservedEvents.CONNECTION_ERROR,
-        onSocketConnectionError,
+        onSocketConnectionError.bind(this),
       );
     }
 
     this._socket.on(SocketReservedEvents.DISCONNECTION, (reason, details) => {
-      this._inputListeners.onSocketDisconnection?.(reason, details);
+      this._inputListeners.onSocketDisconnection?.call(this, reason, details);
 
       if (!this.autoReconnectable) {
         if (reason === "io server disconnect") {
@@ -103,32 +106,38 @@ class ClientSocketManager<
     } = this._inputListeners;
 
     if (onConnectionError) {
-      manager.on(ManagerReservedEvents.CONNECTION_ERROR, onConnectionError);
+      manager.on(
+        ManagerReservedEvents.CONNECTION_ERROR,
+        onConnectionError.bind(this),
+      );
     }
 
     if (onServerPing) {
-      manager.on(ManagerReservedEvents.SERVER_PING, onServerPing);
+      manager.on(ManagerReservedEvents.SERVER_PING, onServerPing.bind(this));
     }
 
     if (onReconnecting) {
-      manager.on(ManagerReservedEvents.RECONNECTING, onReconnecting);
+      manager.on(ManagerReservedEvents.RECONNECTING, onReconnecting.bind(this));
     }
 
     if (onReconnectingError) {
-      manager.on(ManagerReservedEvents.RECONNECTING_ERROR, onReconnectingError);
+      manager.on(
+        ManagerReservedEvents.RECONNECTING_ERROR,
+        onReconnectingError.bind(this),
+      );
     }
 
     if (onReconnectionFailure) {
       manager.on(
         ManagerReservedEvents.RECONNECTION_FAILURE,
-        onReconnectionFailure,
+        onReconnectionFailure.bind(this),
       );
     }
 
     if (onSuccessfulReconnection) {
       manager.on(
         ManagerReservedEvents.SUCCESSFUL_RECONNECTION,
-        onSuccessfulReconnection,
+        onSuccessfulReconnection.bind(this),
       );
     }
   }
@@ -157,11 +166,11 @@ class ClientSocketManager<
     if (!isPageVisible && !isPageHidden) return;
 
     if (isPageVisible) {
-      this._inputListeners.onVisiblePage?.();
+      this._inputListeners.onVisiblePage?.call(this);
 
       if (!this.connected) this.connect();
     } else {
-      this._inputListeners.onHiddenPage?.();
+      this._inputListeners.onHiddenPage?.call(this);
 
       this.disconnect();
     }
@@ -247,7 +256,11 @@ class ClientSocketManager<
     const listener: SubscribeCallback = (...args) => {
       if (!this._socket) return;
 
-      this._inputListeners.onAnySubscribedMessageReceived?.(channel, args);
+      this._inputListeners.onAnySubscribedMessageReceived?.call(
+        this,
+        channel,
+        args,
+      );
 
       (cb as SubscribeCallback).apply(this, args);
     };
@@ -271,7 +284,7 @@ class ClientSocketManager<
 
     if (signal?.aborted) unsubscribe();
 
-    onSubscriptionComplete?.(channel);
+    onSubscriptionComplete?.call(this, channel);
   }
 
   /**
