@@ -4,7 +4,7 @@ const jestConfig: JestConfigWithTsJest = {
   ...createJsWithTsEsmPreset(),
   verbose: true,
   setupFilesAfterEnv: ["./jest.setup.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/dist/", "__tests__/utils"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
   injectGlobals: false,
   moduleNameMapper: {

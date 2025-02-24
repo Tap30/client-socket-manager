@@ -25,7 +25,12 @@
     "build:esm": "tsc --project ./tsconfig.build-esm.json",
     "prebuild": "pnpm run clear",
     "build": "run-p build:*",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "release": "pnpm publish . --tag latest --access public"
+  },
+  "devDependencies": {
+    "@repo/test-helpers": "workspace:*",
+    "jest": "^29.7.0"
   },
   "peerDependencies": {
     "socket.io-client": "^4.8.1"
