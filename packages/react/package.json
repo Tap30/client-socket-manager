@@ -7,8 +7,7 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",
   "files": [
-    "./dist/**/*.js",
-    "./dist/**/*.d.ts",
+    "./dist",
     "README.md",
     "LICENSE"
   ],
