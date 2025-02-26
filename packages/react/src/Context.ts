@@ -3,7 +3,13 @@ import * as React from "react";
 import type { ConnectionStatusValues } from "./types";
 
 export type SocketContextValue = {
-  socketClient: ClientSocketManager | null;
+  /**
+   * The socket client instance.
+   */
+  socket: ClientSocketManager | null;
+  /**
+   * The connection status of the socket instance.
+   */
   connectionStatus: ConnectionStatusValues;
 };
 
