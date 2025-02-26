@@ -13,9 +13,9 @@
     "lint:ecma": "eslint --fix --config eslint.config.js",
     "lint": "run-p lint:*",
     "dev": "pnpm --filter @repo/playground run dev",
-    "core:release": "pnpm --filter @tapsioss/client-socket-manager run build",
+    "core:release": "pnpm --filter @tapsioss/client-socket-manager run release",
     "core:build": "pnpm --filter @tapsioss/client-socket-manager run build",
-    "react:release": "pnpm --filter @tapsioss/react-client-socket-manager run build",
+    "react:release": "pnpm --filter @tapsioss/react-client-socket-manager run release",
     "react:build": "pnpm --filter @tapsioss/react-client-socket-manager run build",
     "release": "pnpm run -r --filter=!@repo/playground release"
   },
