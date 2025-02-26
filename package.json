@@ -10,7 +10,7 @@
     "prebuild": "pnpm run clear",
     "build": "pnpm run -r --filter=!@repo/playground build",
     "lint:ts": "tsc --project tsconfig.json",
-    "lint:ecma": "eslint --fix",
+    "lint:ecma": "eslint --fix --config eslint.config.js",
     "lint": "run-p lint:*",
     "dev": "pnpm --filter @repo/playground run dev",
     "core:release": "pnpm --filter @tapsioss/client-socket-manager run build",

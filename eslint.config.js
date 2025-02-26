@@ -11,18 +11,23 @@ import { config, configs as tsLintConfigs } from "typescript-eslint";
 export default config(
   jsLint.configs.recommended,
   ...tsLintConfigs.recommendedTypeChecked,
+  /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
   importPlugin.flatConfigs.recommended,
   importPlugin.flatConfigs.typescript,
+  /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
   prettierRecommendedConfig,
   {
     files: ["*.ts", "*.tsx"],
   },
   {
+    ignores: ["**/dist/"],
+  },
+  {
     languageOptions: {
       parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
         project: true,
         projectService: {
+          allowDefaultProject: ["eslint.config.js"],
           defaultProject: "./tsconfig.json",
         },
         sourceType: "module",
@@ -32,10 +37,10 @@ export default config(
   {
     files: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
     plugins: {
-      vitest: vitestPlugin,
+      "@vitest": vitestPlugin,
     },
     rules: {
-      ...vitestPlugin.configs.recommended.rules,
+      ...vitestPlugin.configs["legacy-recommended"].rules,
     },
   },
   {
@@ -152,9 +157,5 @@ export default config(
         },
       },
     },
-  },
-  {
-    files: ["*.js", "*.mjs"],
-    ...tsLintConfigs.disableTypeChecked,
   },
 );
