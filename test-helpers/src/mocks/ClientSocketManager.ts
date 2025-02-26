@@ -9,7 +9,7 @@ class ClientSocketManager {
 
   public static __mock__ = true;
 
-  constructor(uri?: string, options?: Partial<ClientSocketManagerOptions>) {
+  constructor(_uri?: string, options?: Partial<ClientSocketManagerOptions>) {
     this._inputListeners = options?.eventHandlers ?? {};
   }
 
@@ -58,12 +58,12 @@ class ClientSocketManager {
     /**
      * The name of the channel to subscribe to.
      */
-    channel: string,
+    _channel: string,
     /**
      * The callback function to invoke when a message is received on the channel.
      */
-    cb: () => void,
-    options?: {
+    _cb: () => void,
+    _options?: {
       /**
        * The callback function to invoke when the subscription is complete.
        */
@@ -82,7 +82,7 @@ class ClientSocketManager {
     /**
      * The name of the channel whose listener should be deleted.
      */
-    channel: string,
+    _channel: string,
   ): void {}
 
   /**
@@ -91,6 +91,7 @@ class ClientSocketManager {
   public connect(): void {
     this._connected = true;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     this._inputListeners.onSocketConnection?.call(this as any);
   }
 
@@ -105,6 +106,7 @@ class ClientSocketManager {
     this._connected = false;
 
     this._inputListeners.onSocketDisconnection?.call(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
       this as any,
       "io client disconnect",
     );
