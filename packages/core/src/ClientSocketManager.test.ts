@@ -1,4 +1,11 @@
 import {
+  createPromiseResolvers,
+  httpServer,
+  socketServer,
+} from "@repo/test-helpers";
+import type { AddressInfo } from "net";
+import type { Socket as ClientSocket } from "socket.io-client";
+import {
   afterAll,
   afterEach,
   beforeAll,
@@ -6,12 +13,8 @@ import {
   describe,
   expect,
   it,
-} from "@jest/globals";
-import type { AddressInfo } from "net";
-import type { Socket as ClientSocket } from "socket.io-client";
-import { ClientSocketManager } from "../src/index.ts";
-import createPromiseResolvers from "./utils/promise-resolvers.ts";
-import { httpServer, socketServer } from "./utils/server.ts";
+} from "vitest";
+import { ClientSocketManager } from "./index.ts";
 
 describe("ClientSocketManager: unit tests", () => {
   let httpServerAddr: AddressInfo | string | null = null;

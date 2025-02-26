@@ -3,6 +3,7 @@
 
 import type { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import type { DisconnectDescription } from "socket.io-client/build/esm/socket";
+import type ClientSocketManager from "./ClientSocketManager";
 
 export type SubscribeCallback = (...args: any[]) => void;
 
@@ -26,43 +27,46 @@ export type ClientSocketManagerListenerOptions = {
    *
    * @param err - The connection error instance.
    */
-  onConnectionError: (err: Error) => void;
+  onConnectionError: (this: ClientSocketManager, err: Error) => void;
   /**
    * Fired when a ping packet is received from the server.
    */
-  onServerPing: () => void;
+  onServerPing: (this: ClientSocketManager) => void;
   /**
    * Fired upon an attempt to reconnect.
    *
    * @param attempt - The number of reconnection attempts.
    */
-  onReconnecting: (attempt: number) => void;
+  onReconnecting: (this: ClientSocketManager, attempt: number) => void;
   /**
    * Fired upon a reconnection attempt error.
    *
    * @param err - The reconnection attempt error instance.
    */
-  onReconnectingError: (err: Error) => void;
+  onReconnectingError: (this: ClientSocketManager, err: Error) => void;
   /**
    * Fired when couldn't reconnect within `reconnectionAttempts`.
    */
-  onReconnectionFailure: () => void;
+  onReconnectionFailure: (this: ClientSocketManager) => void;
   /**
    * Fired upon a successful reconnection.
    *
    * @param attempt - The number of reconnection attempts.
    */
-  onSuccessfulReconnection: (attempt: number) => void;
+  onSuccessfulReconnection: (
+    this: ClientSocketManager,
+    attempt: number,
+  ) => void;
   /**
    * This event is fired by the Socket instance upon connection and reconnection.
    */
-  onSocketConnection: () => void;
+  onSocketConnection: (this: ClientSocketManager) => void;
   /**
    * This event is fired upon connection failure.
    *
    * @param err - The connection error instance.
    */
-  onSocketConnectionError: (err: Error) => void;
+  onSocketConnectionError: (this: ClientSocketManager, err: Error) => void;
   /**
    * This event is fired upon disconnection.
    *
@@ -70,6 +74,7 @@ export type ClientSocketManagerListenerOptions = {
    * @param details - The details of the disconnection.
    */
   onSocketDisconnection: (
+    this: ClientSocketManager,
     reason: Socket.DisconnectReason,
     details?: DisconnectDescription,
   ) => void;
@@ -79,7 +84,7 @@ export type ClientSocketManagerListenerOptions = {
    * The page content may be at least partially visible.
    * In practice this means that the page is the foreground tab of a non-minimized window.
    */
-  onVisiblePage: () => void;
+  onVisiblePage: (this: ClientSocketManager) => void;
   /**
    * This callback is fired when page's `visibilityState` changes to `hidden`.
    *
@@ -87,14 +92,18 @@ export type ClientSocketManagerListenerOptions = {
    * the document's tab being in the background or part of a window that is
    * minimized, or because the device's screen is off.
    */
-  onHiddenPage: () => void;
+  onHiddenPage: (this: ClientSocketManager) => void;
   /**
    * The callback is fired when any message is received from a subscribed channel.
    *
    * @param channel - The name of the channel from which the message is received.
    * @param received - The data received from the channel.
    */
-  onAnySubscribedMessageReceived: (channel: string, received: any[]) => void;
+  onAnySubscribedMessageReceived: (
+    this: ClientSocketManager,
+    channel: string,
+    received: any[],
+  ) => void;
 };
 
 export type ClientSocketManagerOptions = OverrideMembers<

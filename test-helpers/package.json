@@ -1,0 +1,10 @@
+{
+  "name": "@repo/test-helpers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@tapsioss/client-socket-manager": "workspace:*"
+  }
+}

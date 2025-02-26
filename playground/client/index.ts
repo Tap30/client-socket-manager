@@ -1,7 +1,7 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable no-console */
 
-import { ClientSocketManager } from "../../src/index.ts";
+import { ClientSocketManager } from "@tapsioss/client-socket-manager";
 
 const socketManager = new ClientSocketManager("http://localhost:3000", {
   eventHandlers: {

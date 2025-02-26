@@ -12,7 +12,6 @@
     "noEmit": true,
     "allowJs": false,
     "checkJs": false,
-    "jsx": "preserve",
 
     "strict": true,
     "pretty": true,
@@ -27,7 +26,15 @@
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "jsx": "react-jsx",
+
+    "paths": {
+      // Core package
+      "@tapsioss/client-socket-manager": ["./packages/core/src"],
+      // Test helpers package
+      "@repo/test-helpers": ["./test-helpers/src"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist"]
