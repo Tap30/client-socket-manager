@@ -8,8 +8,8 @@
   "types": "./dist/cjs/index.d.ts",
   "files": [
     "./dist",
-    "README.md",
-    "LICENSE"
+    "./README.md",
+    "./LICENSE"
   ],
   "exports": {
     ".": {
