@@ -24,7 +24,7 @@
     "build:esm": "tsc --project ./tsconfig.esm.json",
     "prebuild": "pnpm run clear",
     "build": "run-p build:*",
-    "release": "pnpm publish . --tag latest --access public"
+    "release": "pnpm publish . --tag latest --access public --no-git-checks"
   },
   "dependencies": {
     "@tapsioss/client-socket-manager": "workspace:*"
