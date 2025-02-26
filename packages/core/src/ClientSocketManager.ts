@@ -9,18 +9,20 @@ import type {
   EventsMap,
   SubscribeCallback,
 } from "./types.ts";
-import { assertCallbackType, isBrowser } from "./utils.ts";
+import { assertCallbackType, isBrowser, warnDisposedClient } from "./utils.ts";
 
 class ClientSocketManager<
   ListenEvents extends EventsMap = DefaultEventsMap,
   EmitEvents extends EventsMap = ListenEvents,
 > {
+  private _disposed = false;
+
   private _socket: Socket<ListenEvents, EmitEvents> | null = null;
 
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
   private _channelSubscribersMap = new Map<string, SubscribeCallback>();
 
-  constructor(uri?: string, options?: Partial<ClientSocketManagerOptions>) {
+  constructor(uri: string, options?: Partial<ClientSocketManagerOptions>) {
     const {
       path = "/socket.io",
       reconnectionDelay = 500,
@@ -177,12 +179,21 @@ class ClientSocketManager<
   }
 
   /**
+   * Whether the client is disposed.
+   */
+  public get disposed() {
+    return this._disposed;
+  }
+
+  /**
    * Emits an event to the socket identified by the channel name.
    */
   public emit<Ev extends EventNames<EmitEvents>>(
     channel: Ev,
     ...args: EventParams<EmitEvents, Ev>
   ) {
+    warnDisposedClient(this.disposed);
+
     if (!this._socket) return;
 
     this._socket.emit(channel, ...args);
@@ -194,6 +205,8 @@ class ClientSocketManager<
    * `null` when the socket is not connected.
    */
   public get id(): string | null {
+    warnDisposedClient(this.disposed);
+
     return this._socket?.id ?? null;
   }
 
@@ -201,6 +214,8 @@ class ClientSocketManager<
    * Whether the socket is currently connected to the server.
    */
   public get connected(): boolean {
+    warnDisposedClient(this.disposed);
+
     return this._socket?.connected ?? false;
   }
 
@@ -209,6 +224,8 @@ class ClientSocketManager<
    * In that case, any missed packets will be transmitted by the server.
    */
   public get recovered(): boolean {
+    warnDisposedClient(this.disposed);
+
     return this._socket?.recovered ?? false;
   }
 
@@ -217,6 +234,8 @@ class ClientSocketManager<
    * or reconnects.
    */
   public get autoReconnectable(): boolean {
+    warnDisposedClient(this.disposed);
+
     return this._socket?.active ?? false;
   }
 
@@ -244,6 +263,8 @@ class ClientSocketManager<
       signal?: AbortSignal;
     },
   ): void {
+    warnDisposedClient(this.disposed);
+
     if (!this._socket) return;
 
     assertCallbackType(
@@ -296,6 +317,8 @@ class ClientSocketManager<
      */
     channel: string,
   ): void {
+    warnDisposedClient(this.disposed);
+
     this._channelSubscribersMap.delete(channel);
     this._socket?.off(channel);
   }
@@ -304,6 +327,8 @@ class ClientSocketManager<
    * Manually connects/reconnects the socket.
    */
   public connect(): void {
+    warnDisposedClient(this.disposed);
+
     this._socket?.connect();
   }
 
@@ -315,6 +340,8 @@ class ClientSocketManager<
    * the low-level connection will be closed.
    */
   public disconnect(): void {
+    warnDisposedClient(this.disposed);
+
     this._socket?.disconnect();
   }
 
@@ -323,6 +350,8 @@ class ClientSocketManager<
    * closed and cleaned up.
    */
   public dispose(): void {
+    warnDisposedClient(this.disposed);
+
     this._detachPageEvents();
     this._detachSocketEvents();
     this._detachManagerEvents();
@@ -333,6 +362,7 @@ class ClientSocketManager<
     this._socket = null;
     this._channelSubscribersMap.clear();
     this._inputListeners = {};
+    this._disposed = true;
   }
 }
 
