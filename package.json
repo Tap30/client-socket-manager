@@ -8,7 +8,6 @@
     "clear": "shx rm -rf dist",
     "test": "vitest",
     "prebuild": "pnpm run clear",
-    "build": "pnpm run -r --filter=!@repo/playground build",
     "lint:ts": "tsc --project tsconfig.json",
     "lint:ecma": "eslint --fix --config eslint.config.js",
     "lint": "run-p lint:*",
@@ -16,8 +15,7 @@
     "core:release": "pnpm --filter @tapsioss/client-socket-manager run release",
     "core:build": "pnpm --filter @tapsioss/client-socket-manager run build",
     "react:release": "pnpm --filter @tapsioss/react-client-socket-manager run release",
-    "react:build": "pnpm --filter @tapsioss/react-client-socket-manager run build",
-    "release": "pnpm run -r --filter=!@repo/playground release"
+    "react:build": "pnpm --filter @tapsioss/react-client-socket-manager run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

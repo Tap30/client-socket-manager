@@ -3,19 +3,21 @@
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@9.15.0",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/cjs/index.d.ts",
+  "main": "./dist/cjs/react/src/index.js",
+  "module": "./dist/esm/react/src/index.js",
+  "types": "./dist/cjs/react/src/index.d.ts",
   "files": [
     "./dist",
+    "!./dist/cjs/core",
+    "!./dist/esm/core",
     "./README.md",
     "./LICENSE"
   ],
   "exports": {
     ".": {
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.js",
-      "types": "./dist/cjs/index.d.ts"
+      "require": "./dist/cjs/react/src/index.js",
+      "import": "./dist/esm/react/src/index.js",
+      "types": "./dist/cjs/react/src/index.d.ts"
     }
   },
   "scripts": {
