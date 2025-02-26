@@ -29,8 +29,6 @@
     "useDefineForClassFields": false,
     "jsx": "react-jsx",
 
-    "types": ["@testing-library/jest-dom"],
-
     "paths": {
       // Core package
       "@tapsioss/client-socket-manager": ["./packages/core/src"],
