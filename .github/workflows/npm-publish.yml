@@ -19,17 +19,23 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
+      - name: Set PACKAGE_NAME variable
+        id: set-package-name
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "PACKAGE_NAME=$(echo $TAG_NAME | cut -d '@' -f 1)" >> $GITHUB_ENV
+
       - name: "📦 install dependencies"
         run: pnpm install
 
       - name: "🧱 build package"
-        run: pnpm build
+        run: pnpm ${{ env.PACKAGE_NAME }}:build
 
       - name: "🗄️ archive package"
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
+          path: packages/${{ env.PACKAGE_NAME }}/dist
 
   publish-npm:
     needs: build
@@ -47,6 +53,12 @@ jobs:
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
 
+      - name: Set PACKAGE_NAME variable
+        id: set-package-name
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "PACKAGE_NAME=$(echo $TAG_NAME | cut -d '@' -f 1)" >> $GITHUB_ENV
+
       - name: "📦 install dependencies"
         run: pnpm install
 
@@ -54,9 +66,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist
+          path: packages/${{ env.PACKAGE_NAME }}/dist
 
       - name: "🚀 publish package"
-        run: pnpm release
+        run: pnpm ${{ env.PACKAGE_NAME }}:release
         env:
           NPM_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
