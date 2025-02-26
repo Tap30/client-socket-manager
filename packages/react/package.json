@@ -20,6 +20,20 @@
       "types": "./dist/cjs/react/src/index.d.ts"
     }
   },
+  "keywords": [
+    "react",
+    "web-socket",
+    "socket-io.client",
+    "client-socket-manager"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tap30/client-socket-manager.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/Tap30/client-socket-manager/issues"
+  },
   "scripts": {
     "clear": "shx rm -rf dist",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
