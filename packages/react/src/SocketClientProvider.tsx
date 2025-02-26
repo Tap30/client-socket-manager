@@ -7,71 +7,73 @@ import type {
   SocketClientProviderProps,
 } from "./types";
 
-const __SINGLETON_REFS__: {
-  socket: ClientSocketManager | null;
-} = {
-  socket: null,
-};
+const __SINGLETON_REFS__: Record<string, ClientSocketManager | null> = {};
 
 const SocketClientProvider = (props: SocketClientProviderProps) => {
   const { children, uri, ...options } = props;
 
-  const [socketClient, setSocketClient] = React.useState(
-    __SINGLETON_REFS__.socket,
+  const [clientInstance, setClientInstance] = React.useState(
+    __SINGLETON_REFS__[uri] ?? null,
   );
 
   const [connectionStatus, setConnectionStatus] =
     React.useState<ConnectionStatusValues>(ConnectionStatus.DISCONNECTED);
 
-  const outerCtx = React.useContext(SocketContext);
-
-  if (outerCtx) {
-    throw new Error(
-      [
-        "ClientSocketManager: Nested `<SocketClientProvider>`s detected.",
-        "Please ensure that `<SocketClientProvider>`s are not nested within each other.",
-      ].join(" "),
-    );
-  }
-
   React.useEffect(() => {
-    if (__SINGLETON_REFS__.socket) return;
+    if (!__SINGLETON_REFS__[uri]) {
+      const client = new ClientSocketManager(uri, {
+        ...options,
+        eventHandlers: {
+          ...(options.eventHandlers ?? {}),
+          onSocketConnection() {
+            options.eventHandlers?.onSocketConnection?.call(client);
 
-    const client = new ClientSocketManager(uri, {
-      ...options,
-      eventHandlers: {
-        ...(options.eventHandlers ?? {}),
-        onSocketConnection() {
-          options.eventHandlers?.onSocketConnection?.();
+            setConnectionStatus(ConnectionStatus.CONNECTED);
+          },
+          onSocketDisconnection(reason, details) {
+            options.eventHandlers?.onSocketDisconnection?.call(
+              client,
+              reason,
+              details,
+            );
 
-          setConnectionStatus(ConnectionStatus.CONNECTED);
+            setConnectionStatus(ConnectionStatus.DISCONNECTED);
+          },
+          onReconnecting(attempt) {
+            options.eventHandlers?.onReconnecting?.call(client, attempt);
+
+            setConnectionStatus(ConnectionStatus.RECONNECTING);
+          },
         },
-        onSocketDisconnection(reason, details) {
-          options.eventHandlers?.onSocketDisconnection?.(reason, details);
+      });
 
-          setConnectionStatus(ConnectionStatus.DISCONNECTED);
-        },
-        onReconnecting(attempt) {
-          options.eventHandlers?.onReconnecting?.(attempt);
+      setClientInstance(client);
 
-          setConnectionStatus(ConnectionStatus.RECONNECTING);
-        },
-      },
-    });
-
-    setSocketClient(client);
+      __SINGLETON_REFS__[uri] = client;
+    } else {
+      throw new Error(
+        [
+          `ClientSocketManager: An active client already exists for the URI "${uri}".`,
+          "Multiple clients for the same URI are not allowed.",
+        ].join(" "),
+      );
+    }
 
     return () => {
-      client.dispose();
-
-      __SINGLETON_REFS__.socket = null;
+      if (__SINGLETON_REFS__[uri]) {
+        __SINGLETON_REFS__[uri].dispose();
+        __SINGLETON_REFS__[uri] = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const ctx = React.useMemo<SocketContextValue>(
-    () => ({ socketClient, connectionStatus }),
-    [connectionStatus, socketClient],
+    () => ({
+      connectionStatus,
+      socket: clientInstance,
+    }),
+    [connectionStatus, clientInstance],
   );
 
   return (

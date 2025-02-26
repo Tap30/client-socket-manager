@@ -8,5 +8,5 @@ export type ConnectionStatusValues = StatusType[keyof StatusType];
 
 export type SocketClientProviderProps = {
   children: React.ReactNode;
-  uri?: string;
+  uri: string;
 } & Partial<ClientSocketManagerOptions>;
