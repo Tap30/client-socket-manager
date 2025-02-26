@@ -1,7 +1,7 @@
 import jsLint from "@eslint/js";
+import vitestPlugin from "@vitest/eslint-plugin";
 import commentsPlugin from "eslint-plugin-eslint-comments";
 import importPlugin from "eslint-plugin-import";
-import jestPlugin from "eslint-plugin-jest";
 import prettierRecommendedConfig from "eslint-plugin-prettier/recommended";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -31,9 +31,11 @@ export default config(
   },
   {
     files: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
-    extends: [jestPlugin.configs["flat/recommended"]],
+    plugins: {
+      vitest: vitestPlugin,
+    },
     rules: {
-      "jest/prefer-importing-jest-globals": "error",
+      ...vitestPlugin.configs.recommended.rules,
     },
   },
   {
@@ -141,6 +143,9 @@ export default config(
       ],
     },
     settings: {
+      react: {
+        version: "detect",
+      },
       "import/resolver": {
         typescript: {
           project: "tsconfig.json",
