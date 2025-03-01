@@ -40,7 +40,7 @@ describe("SocketClientProvider", () => {
     typeof ClientSocketManager
   >;
 
-  it("should throw error when nested SocketClientProvider is detected", () => {
+  it("should throw error when multiple socket instances is detected", () => {
     expect(() => {
       render(
         <SocketClientProvider uri={socketServerUri}>
@@ -50,6 +50,42 @@ describe("SocketClientProvider", () => {
         </SocketClientProvider>,
       );
     }).toThrow();
+
+    expect(() => {
+      render(
+        <>
+          <SocketClientProvider uri={socketServerUri}>
+            <div />
+          </SocketClientProvider>
+          <SocketClientProvider uri={socketServerUri}>
+            <div />
+          </SocketClientProvider>
+        </>,
+      );
+    }).toThrow();
+
+    expect(() => {
+      render(
+        <SocketClientProvider uri={socketServerUri}>
+          <SocketClientProvider uri={`${socketServerUri}/ns1`}>
+            <div />
+          </SocketClientProvider>
+        </SocketClientProvider>,
+      );
+    }).not.toThrow();
+
+    expect(() => {
+      render(
+        <>
+          <SocketClientProvider uri={`${socketServerUri}/ns2`}>
+            <div />
+          </SocketClientProvider>
+          <SocketClientProvider uri={`${socketServerUri}/ns3`}>
+            <div />
+          </SocketClientProvider>
+        </>,
+      );
+    }).not.toThrow();
   });
 
   it("should initialize ClientSocketManager and set connection status", () => {
