@@ -254,7 +254,10 @@ class ClientSocketManager<
       /**
        * The callback function to invoke when the subscription is complete.
        */
-      onSubscriptionComplete?: (channel: string) => void;
+      onSubscriptionComplete?: (
+        this: ClientSocketManager,
+        channel: string,
+      ) => void;
       /**
        * The `AbortSignal` to unsubscribe the listener upon abortion.
        */
