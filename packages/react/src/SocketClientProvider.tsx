@@ -71,7 +71,12 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
   const ctx = React.useMemo<SocketContextValue>(
     () => ({
       connectionStatus,
-      socket: clientInstance,
+      get socket() {
+        if (!clientInstance) return null;
+        if (clientInstance.disposed) return null;
+
+        return clientInstance;
+      },
     }),
     [connectionStatus, clientInstance],
   );

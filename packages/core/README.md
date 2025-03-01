@@ -27,7 +27,7 @@ npm install @tapsioss/client-socket-manager socket.io-client
 Here is an example of how to use `ClientSocketManager` in your project:
 
 ```ts
-import ClientSocketManager from '@tapsioss/client-socket-manager';
+import { ClientSocketManager } from '@tapsioss/client-socket-manager';
 
 const socketManager = new ClientSocketManager('http://localhost:3000', {
   eventHandlers: {
@@ -50,7 +50,7 @@ const socketManager = new ClientSocketManager('http://localhost:3000', {
 socketManager.emit('message', 'Hello, world!');
 
 // Subscribe to a channel
-socketManager.setChannelListener('message', (msg) => {
+socketManager.subscribe('message', (msg) => {
   console.log('Message from server:', msg);
 });
 ```
@@ -125,10 +125,10 @@ Emits an event to the socket identified by the channel name.
 - `channel`: The name of the channel to emit the event to.
 - `args`: The arguments to pass with the event.
 
-#### `setChannelListener`:
+#### `subscribe`:
 
 ```ts
-setChannelListener<Ev extends EventNames<ListenEvents>>(
+subscribe<Ev extends EventNames<ListenEvents>>(
   channel: Ev,
   cb: ListenEvents[Ev],
   options?: {
@@ -148,17 +148,21 @@ Subscribes to a specified channel with a callback function. Ensures that only on
   - `onSubscriptionComplete`: The callback function to invoke when the subscription is complete.
   - `signal`: The `AbortSignal` to unsubscribe the listener upon abortion.
   
-#### `deleteChannelListener`:
+#### `unsubscribe`:
 
 ```ts
-deleteChannelListener(channel: string): void;
+unsubscribe<Ev extends EventNames<ListenEvents>>(
+  channel: Ev,
+  cb?: ListenEvents[Ev],
+): void;
 ```
 
-Deletes the listener for a specified channel.
+Removes the listener for the specified channel. If no callback is provided, it removes all listeners for that channel.
 
 ##### Parameters:
 
 - `channel`: The name of the channel whose listener should be deleted.
+- `cb` (optional): The subscriber callback function to remove.
 
 #### `connect`:
 

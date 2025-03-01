@@ -6,6 +6,7 @@ import type {
 class ClientSocketManager {
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
   private _connected = false;
+  private _disposed = false;
 
   public static __mock__ = true;
 
@@ -13,81 +14,39 @@ class ClientSocketManager {
     this._inputListeners = options?.eventHandlers ?? {};
   }
 
-  /**
-   * Emits an event to the socket identified by the channel name.
-   */
-  public emit() {}
-
-  /**
-   * A unique identifier for the session.
-   *
-   * `null` when the socket is not connected.
-   */
   public get id(): string | null {
     return this._connected ? "__id__" : null;
   }
 
-  /**
-   * Whether the socket is currently connected to the server.
-   */
   public get connected(): boolean {
     return this._connected;
   }
 
-  /**
-   * Whether the connection state was recovered after a temporary disconnection.
-   * In that case, any missed packets will be transmitted by the server.
-   */
   public get recovered(): boolean {
     return false;
   }
 
-  /**
-   * Whether the Socket will try to reconnect when its Manager connects
-   * or reconnects.
-   */
   public get autoReconnectable(): boolean {
     return false;
   }
 
-  /**
-   * Subscribes to a specified channel with a callback function.
-   * Ensures that only one listener exists per channel.
-   */
-  public setChannelListener(
-    /**
-     * The name of the channel to subscribe to.
-     */
+  public get disposed() {
+    return this._disposed;
+  }
+
+  public emit() {}
+
+  public subscribe(
     _channel: string,
-    /**
-     * The callback function to invoke when a message is received on the channel.
-     */
     _cb: () => void,
     _options?: {
-      /**
-       * The callback function to invoke when the subscription is complete.
-       */
       onSubscriptionComplete?: (channel: string) => void;
-      /**
-       * The `AbortSignal` to unsubscribe the listener upon abortion.
-       */
       signal?: AbortSignal;
     },
   ): void {}
 
-  /**
-   * Deletes the listener for a specified channel.
-   */
-  public deleteChannelListener(
-    /**
-     * The name of the channel whose listener should be deleted.
-     */
-    _channel: string,
-  ): void {}
+  public unsubscribe(_channel: string, _cb: () => void): void {}
 
-  /**
-   * Manually connects/reconnects the socket.
-   */
   public connect(): void {
     this._connected = true;
 
@@ -95,13 +54,6 @@ class ClientSocketManager {
     this._inputListeners.onSocketConnection?.call(this as any);
   }
 
-  /**
-   * Manually disconnects the socket.
-   * In that case, the socket will not try to reconnect.
-   *
-   * If this is the last active Socket instance of the Manager,
-   * the low-level connection will be closed.
-   */
   public disconnect(): void {
     this._connected = false;
 
@@ -112,12 +64,10 @@ class ClientSocketManager {
     );
   }
 
-  /**
-   * Disposes of the socket, manager, and engine, ensuring all connections are
-   * closed and cleaned up.
-   */
   public dispose(): void {
     this.disconnect();
+
+    this._disposed = true;
     this._inputListeners = {};
   }
 }

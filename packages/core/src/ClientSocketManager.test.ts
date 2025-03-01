@@ -197,7 +197,7 @@ describe("ClientSocketManager: unit tests", () => {
 
     expect(socketManager.connected).toBe(true);
 
-    socketManager.setChannelListener(serverChannel, msg => {
+    socketManager.subscribe(serverChannel, msg => {
       messageResolver.resolve(msg as string);
     });
 
