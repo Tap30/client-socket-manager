@@ -20,7 +20,6 @@ class ClientSocketManager<
   private _socket: Socket<ListenEvents, EmitEvents> | null = null;
 
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
-  private _channelSubscribersMap = new Map<string, SubscribeCallback>();
 
   constructor(uri: string, options?: Partial<ClientSocketManagerOptions>) {
     const {
@@ -241,9 +240,8 @@ class ClientSocketManager<
 
   /**
    * Subscribes to a specified channel with a callback function.
-   * Ensures that only one listener exists per channel.
    */
-  public setChannelListener<Ev extends EventNames<ListenEvents>>(
+  public subscribe<Ev extends EventNames<ListenEvents>>(
     /**
      * The name of the channel to subscribe to.
      */
@@ -275,6 +273,8 @@ class ClientSocketManager<
     const { onSubscriptionComplete, signal } = options ?? {};
 
     const listener: SubscribeCallback = (...args) => {
+      warnDisposedClient(this.disposed);
+
       if (!this._socket) return;
 
       this._inputListeners.onAnySubscribedMessageReceived?.call(
@@ -286,17 +286,10 @@ class ClientSocketManager<
       (cb as SubscribeCallback).apply(this, args);
     };
 
-    if (this._channelSubscribersMap.has(channel)) {
-      const subscriber = this._channelSubscribersMap.get(channel)!;
-
-      this._socket.off(channel, subscriber as ListenEvents[Ev]);
-    }
-
     this._socket.on(channel, listener as ListenEvents[Ev]);
-    this._channelSubscribersMap.set(channel, listener);
 
     const unsubscribe = () => {
-      this.deleteChannelListener(channel);
+      this.unsubscribe(channel, listener as ListenEvents[Ev]);
 
       signal?.removeEventListener("abort", unsubscribe);
     };
@@ -309,18 +302,25 @@ class ClientSocketManager<
   }
 
   /**
-   * Deletes the listener for a specified channel.
+   * Removes the listener for the specified channel.
+   * If no callback is provided, it removes all listeners for that channel.
    */
-  public deleteChannelListener(
+  public unsubscribe<Ev extends EventNames<ListenEvents>>(
     /**
      * The name of the channel whose listener should be deleted.
      */
-    channel: string,
+    channel: Ev,
+    /**
+     * The subscriber callback function to remove.
+     */
+    cb?: ListenEvents[Ev],
   ): void {
     warnDisposedClient(this.disposed);
 
-    this._channelSubscribersMap.delete(channel);
-    this._socket?.off(channel);
+    if (!this._socket) return;
+
+    if (cb) this._socket.off(channel, cb);
+    else this._socket.off(channel);
   }
 
   /**
@@ -360,7 +360,6 @@ class ClientSocketManager<
     this._socket?.io.engine.close();
 
     this._socket = null;
-    this._channelSubscribersMap.clear();
     this._inputListeners = {};
     this._disposed = true;
   }

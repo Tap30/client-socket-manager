@@ -24,24 +24,8 @@ import SocketClientProvider from "./SocketClientProvider.tsx";
 vitest.mock("@tapsioss/client-socket-manager", () => {
   return {
     ClientSocketManager: vitest.fn(
-      (uri: string, options?: Partial<ClientSocketManagerOptions>) => {
-        const mock = new __MockClientSocketManager__(uri, options);
-
-        return {
-          get connected() {
-            return mock.connected;
-          },
-          connect() {
-            mock.connect();
-          },
-          disconnect() {
-            mock.disconnect();
-          },
-          dispose() {
-            mock.dispose();
-          },
-        };
-      },
+      (uri: string, options?: Partial<ClientSocketManagerOptions>) =>
+        new __MockClientSocketManager__(uri, options),
     ),
   };
 });
@@ -115,12 +99,21 @@ describe("SocketClientProvider", () => {
     expect(screen.getByTestId("socket-instance")).toHaveTextContent("true");
 
     act(() => {
+      client.connect();
+    });
+
+    expect(screen.getByTestId("connection-status")).toHaveTextContent(
+      ConnectionStatus.CONNECTED,
+    );
+    expect(screen.getByTestId("socket-instance")).toHaveTextContent("true");
+
+    act(() => {
       client.dispose();
     });
 
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
       ConnectionStatus.DISCONNECTED,
     );
-    expect(screen.getByTestId("socket-instance")).toHaveTextContent("true");
+    expect(screen.getByTestId("socket-instance")).toHaveTextContent("false");
   });
 });
