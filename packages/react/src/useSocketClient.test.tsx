@@ -25,24 +25,8 @@ import useSocketClient from "./useSocketClient.ts";
 vitest.mock("@tapsioss/client-socket-manager", () => {
   return {
     ClientSocketManager: vitest.fn(
-      (uri: string, options?: Partial<ClientSocketManagerOptions>) => {
-        const mock = new __MockClientSocketManager__(uri, options);
-
-        return {
-          get connected() {
-            return mock.connected;
-          },
-          connect() {
-            mock.connect();
-          },
-          disconnect() {
-            mock.disconnect();
-          },
-          dispose() {
-            mock.dispose();
-          },
-        };
-      },
+      (uri: string, options?: Partial<ClientSocketManagerOptions>) =>
+        new __MockClientSocketManager__(uri, options),
     ),
   };
 });
