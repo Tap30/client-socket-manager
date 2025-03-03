@@ -1,12 +1,11 @@
-import type { ClientSocketManager } from "@tapsioss/client-socket-manager";
 import * as React from "react";
-import type { ConnectionStatusValues } from "./types";
+import type { ConnectionStatusValues, SocketInstance } from "./types";
 
 export type SocketContextValue = {
   /**
    * The socket client instance.
    */
-  socket: ClientSocketManager | null;
+  socket: SocketInstance | null;
   /**
    * The connection status of the socket instance.
    */
