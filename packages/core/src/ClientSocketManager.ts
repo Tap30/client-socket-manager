@@ -19,7 +19,7 @@ class ClientSocketManager<
 
   private _socket: Socket<ListenEvents, EmitEvents> | null = null;
 
-  private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
+  private _inputListeners: Partial<ClientSocketManagerListenerOptions> = {};
 
   constructor(uri: string, options?: Partial<ClientSocketManagerOptions>) {
     const {
@@ -30,8 +30,6 @@ class ClientSocketManager<
       ...restOptions
     } = options ?? {};
 
-    this._inputListeners = eventHandlers ?? {};
-
     try {
       this._socket = io(uri, {
         ...restOptions,
@@ -39,6 +37,15 @@ class ClientSocketManager<
         reconnectionDelay,
         reconnectionDelayMax,
       });
+      this._inputListeners = eventHandlers ?? {};
+
+      this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
+
+      this._attachPageEvents();
+      this._attachSocketEvents();
+      this._attachManagerEvents();
+
+      this._inputListeners.onInit?.call(this);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to initialize socket connection", {
@@ -47,12 +54,6 @@ class ClientSocketManager<
         err,
       });
     }
-
-    this._handleVisibilityChange = this._handleVisibilityChange.bind(this);
-
-    this._attachPageEvents();
-    this._attachSocketEvents();
-    this._attachManagerEvents();
   }
 
   private _attachPageEvents(): void {
@@ -354,6 +355,8 @@ class ClientSocketManager<
    */
   public dispose(): void {
     warnDisposedClient(this.disposed);
+
+    this._inputListeners.onDispose?.call(this);
 
     this._detachPageEvents();
     this._detachSocketEvents();

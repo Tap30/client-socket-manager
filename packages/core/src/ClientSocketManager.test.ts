@@ -249,4 +249,46 @@ describe("ClientSocketManager: unit tests", () => {
 
     expect(message).toBe(clientMessage);
   });
+
+  it("should handle init and dipose", async () => {
+    const connectResolver = createPromiseResolvers();
+    const initResolver = createPromiseResolvers();
+    const initMessageResolver = createPromiseResolvers();
+    const diposeResolver = createPromiseResolvers();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onInit() {
+          initResolver.resolve();
+          this.subscribe("test/init", () => {
+            initMessageResolver.resolve();
+          });
+        },
+        onDispose() {
+          diposeResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    expect(socketManager.connected).toBe(true);
+    expect(socketManager.disposed).toBe(false);
+
+    await initResolver.promise;
+
+    socketServer.emit("test/init");
+
+    await initMessageResolver.promise;
+
+    socketManager.dispose();
+
+    await diposeResolver.promise;
+
+    expect(socketManager.connected).toBe(false);
+    expect(socketManager.disposed).toBe(true);
+  });
 });
