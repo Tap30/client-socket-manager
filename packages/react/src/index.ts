@@ -2,6 +2,7 @@ export { ConnectionStatus } from "./constants.ts";
 export { default as SocketClientProvider } from "./SocketClientProvider.tsx";
 export type {
   ConnectionStatusValues,
+  SocketClientHookReturnType,
   SocketClientProviderProps,
   SocketInstance,
 } from "./types.ts";
