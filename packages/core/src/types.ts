@@ -23,6 +23,14 @@ type OverrideMembers<
 
 export type ClientSocketManagerListenerOptions = {
   /**
+   * Fired upon instantiation.
+   */
+  onInit: (this: ClientSocketManager) => void;
+  /**
+   * Fired upon disposal.
+   */
+  onDispose: (this: ClientSocketManager) => void;
+  /**
    * Fired upon a connection error.
    *
    * @param err - The connection error instance.
