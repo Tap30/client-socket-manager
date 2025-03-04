@@ -117,7 +117,7 @@ We have extended [socket-io's options](https://socket.io/docs/v4/client-options/
 ```ts
 type ConnectionStatusValues = "connected" | "disconnected" | 'reconnecting';
 
-type SocketContextValue = {
+type SocketClientHookReturnType = {
   /**
    * The socket client instance.
    */
@@ -128,7 +128,7 @@ type SocketContextValue = {
   connectionStatus: ConnectionStatusValues;
 };
 
-const useSocketClient: () => SocketContextValue;
+const useSocketClient: () => SocketClientHookReturnType;
 ```
 
 A custom hook to access the `ClientSocketManager` client.
