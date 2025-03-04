@@ -73,6 +73,8 @@ constructor(uri: string, options?: Partial<ClientSocketManagerOptions>)
 We have extended [socket-io's options](https://socket.io/docs/v4/client-options/) to include additional options:
 
 - `eventHandlers`: Handlers for various socket events.
+  - `onInit`: Fired upon instantiation.
+  - `onDispose`: Fired upon disposal.
   - `onSocketConnection`: Fired when the socket is successfully connected.
   - `onSocketDisconnection`: Fired when the socket is disconnected.
   - `onServerPing`: Fired when a ping packet is received from the server.
