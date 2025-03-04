@@ -1,7 +1,8 @@
 import * as React from "react";
 import { SocketContext } from "./Context.ts";
+import type { SocketClientHookReturnType } from "./types.ts";
 
-const useSocketClient = () => {
+const useSocketClient = (): SocketClientHookReturnType => {
   const ctx = React.useContext(SocketContext);
 
   if (!ctx) {
