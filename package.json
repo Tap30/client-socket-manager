@@ -5,17 +5,68 @@
   "packageManager": "pnpm@9.15.0",
   "private": true,
   "scripts": {
-    "clear": "shx rm -rf dist",
     "test": "vitest",
-    "prebuild": "pnpm run clear",
-    "lint:ts": "tsc --project tsconfig.json",
-    "lint:ecma": "eslint --fix --config eslint.config.js",
-    "lint": "run-p lint:*",
+    "lint": "wireit",
     "dev": "pnpm --filter @repo/playground run dev",
     "core:release": "pnpm --filter @tapsioss/client-socket-manager run release",
-    "core:build": "pnpm --filter @tapsioss/client-socket-manager run build",
+    "core:build": "wireit",
     "react:release": "pnpm --filter @tapsioss/react-client-socket-manager run release",
-    "react:build": "pnpm --filter @tapsioss/react-client-socket-manager run build"
+    "react:build": "wireit"
+  },
+  "wireit": {
+    "lint": {
+      "dependencies": [
+        "lint:ts",
+        "lint:ecma"
+      ]
+    },
+    "lint:ts": {
+      "command": "tsc --project tsconfig.json",
+      "files": [
+        "./tsconfig.json",
+        "**/*.{ts,tsx}",
+        "!dist/**/*"
+      ],
+      "output": []
+    },
+    "lint:ecma": {
+      "command": "eslint --color --cache --config eslint.config.js --cache-location .eslintcache",
+      "files": [
+        "**/*.{ts,tsx}",
+        "!dist/**/*",
+        "./eslint.config.js"
+      ],
+      "output": []
+    },
+    "react:build": {
+      "command": "pnpm --filter @tapsioss/react-client-socket-manager run build",
+      "files": [
+        "./packages/react/tsconfig.json",
+        "./packages/react/tsconfig.*.json",
+        "./packages/react/src/**/*",
+        "!./packages/react/src/**/*.test.{ts,tsx}"
+      ],
+      "output": [
+        "./packages/react/dist/**/*",
+        "./packages/react/dist/**/*.tsbuildinfo"
+      ],
+      "dependencies": [
+        "core:build"
+      ]
+    },
+    "core:build": {
+      "command": "pnpm --filter @tapsioss/client-socket-manager run build",
+      "files": [
+        "./packages/core/tsconfig.json",
+        "./packages/core/tsconfig.*.json",
+        "./packages/core/src/**/*",
+        "!./packages/react/src/**/*.test.{ts,tsx}"
+      ],
+      "output": [
+        "./packages/core/dist/**/*",
+        "./packages/core/dist/**/*.tsbuildinfo"
+      ]
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
@@ -54,6 +105,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.25.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.7"
+    "vitest": "^3.0.7",
+    "wireit": "^0.14.11"
   }
 }
