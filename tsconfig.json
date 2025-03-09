@@ -31,7 +31,7 @@
 
     "paths": {
       // Core package
-      "@tapsioss/client-socket-manager": ["./packages/core/src"],
+      "@tapsioss/client-socket-manager": ["./packages/core/dist/esm"],
       // Test helpers package
       "@repo/test-helpers": ["./test-helpers/src"]
     }
