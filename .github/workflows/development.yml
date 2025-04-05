@@ -29,6 +29,9 @@ jobs:
       - name: "📦 install dependencies"
         run: pnpm install
 
+      - name: "🔌 setup wireit cache"
+        uses: google/wireit@setup-github-actions-caching/v2
+
       - name: "🔍 run tests"
         run: pnpm test
 
@@ -51,6 +54,9 @@ jobs:
 
       - name: "📦 install dependencies"
         run: pnpm install
+
+      - name: "🔌 setup wireit cache"
+        uses: google/wireit@setup-github-actions-caching/v2
 
       - name: "🔍 lint code"
         run: pnpm lint
