@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "Tap30/client-socket-manager"
+    }
+  ],
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    ["@tapsioss/client-socket-manager", "@tapsioss/react-client-socket-manager"]
+  ],
+  "access": "public",
+  "baseBranch": "main",
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
+  "prettier": false,
+  "updateInternalDependencies": "patch",
+  "ignore": ["@repo/playground"]
+}
