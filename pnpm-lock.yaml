@@ -126,8 +126,8 @@ importers:
         specifier: ^3.0.7
         version: 3.0.7(@types/node@20.17.19)(@vitest/browser@3.0.7)(jsdom@26.0.0)(msw@2.7.3(@types/node@20.17.19)(typescript@5.7.3))(tsx@4.19.3)(yaml@2.7.0)
       wireit:
-        specifier: ^0.14.11
-        version: 0.14.11
+        specifier: ^0.14.12
+        version: 0.14.12
 
   packages/core:
     dependencies:
@@ -3467,8 +3467,8 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  wireit@0.14.11:
-    resolution: {integrity: sha512-edO3AiL1wYlBIapwx8e1OGEmsG37sv7qnRzx4YDsMPcKo+6NMOjWYcfRbaeoB1MzakLrnozWB2Q1q7Ko45NckA==}
+  wireit@0.14.12:
+    resolution: {integrity: sha512-gNSd+nZmMo6cuICezYXRIayu6TSOeCSCDzjSF0q6g8FKDsRbdqrONrSZYzdk/uBISmRcv4vZtsno6GyGvdXwGA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -7177,7 +7177,7 @@ snapshots:
       siginfo: 2.0.0
       stackback: 0.0.2
 
-  wireit@0.14.11:
+  wireit@0.14.12:
     dependencies:
       brace-expansion: 4.0.0
       chokidar: 3.6.0
