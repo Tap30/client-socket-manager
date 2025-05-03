@@ -118,6 +118,6 @@
     "typescript-eslint": "^8.25.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.7",
-    "wireit": "^0.14.11"
+    "wireit": "^0.14.12"
   }
 }
