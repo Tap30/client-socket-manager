@@ -17,6 +17,28 @@ const __SINGLETON_REFS__: Record<
   | null
 > = {};
 
+/**
+ * React provider that initializes and manages a socket connection via `ClientSocketManager`.
+ *
+ * It optionally uses a stubbed socket manager in server-side rendering or testing environments.
+ * The provider ensures a singleton instance per URI and updates the connection status accordingly.
+ *
+ * Properties:
+ * - `children` (`React.ReactNode`): React children to render within the provider.
+ * - `uri` (`string`): The URI to connect the socket client to.
+ * - `shouldUseStob?` (`boolean`): Optional flag indicating whether to use the stubbed version of `ClientSocketManager` (useful for SSR or testing).
+ * - Additional props from `ClientSocketManagerOptions` can be provided, such as `eventHandlers`, `reconnectionDelay`, etc.
+ *
+ * @param props - Props for the provider, including connection URI, stub flag, and socket manager options.
+ * @returns A context provider that supplies the socket instance and its connection status.
+ *
+ * @example
+ * ```tsx
+ * <SocketClientProvider uri="https://example.com/socket" shouldUseStob={typeof window === "undefined"}>
+ *   <App />
+ * </SocketClientProvider>
+ * ```
+ */
 const SocketClientProvider = (props: SocketClientProviderProps) => {
   const { children, uri, ...options } = props;
 
@@ -31,7 +53,6 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
     client: SocketContextValue["socket"],
   ) => {
     setClientInstance(client);
-
     __SINGLETON_REFS__[uri] = client;
   };
 
@@ -46,7 +67,6 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
             ...(options.eventHandlers ?? {}),
             onSocketConnection() {
               options.eventHandlers?.onSocketConnection?.call(client);
-
               setConnectionStatus(ConnectionStatus.CONNECTED);
             },
             onSocketDisconnection(reason, details) {
@@ -55,12 +75,10 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
                 reason,
                 details,
               );
-
               setConnectionStatus(ConnectionStatus.DISCONNECTED);
             },
             onReconnecting(attempt) {
               options.eventHandlers?.onReconnecting?.call(client, attempt);
-
               setConnectionStatus(ConnectionStatus.RECONNECTING);
             },
           },
