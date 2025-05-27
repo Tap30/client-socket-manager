@@ -1,11 +1,7 @@
-import {
-  MockClientSocketManager as __MockClientSocketManager__,
-  act,
-  render,
-  screen,
-} from "@repo/test-helpers";
+import { act, render, screen } from "@repo/test-helpers";
 import {
   ClientSocketManager,
+  ClientSocketManagerStub,
   type ClientSocketManagerOptions,
 } from "@tapsioss/client-socket-manager";
 import {
@@ -22,11 +18,16 @@ import { ConnectionStatus } from "./constants.ts";
 import useSocketClient from "./useSocketClient.ts";
 
 // Mock the ClientSocketManager class
-vitest.mock("@tapsioss/client-socket-manager", () => {
+vitest.mock("@tapsioss/client-socket-manager", async () => {
+  const actualImports = await vitest.importActual(
+    "@tapsioss/client-socket-manager",
+  );
+
   return {
+    ...actualImports,
     ClientSocketManager: vitest.fn(
       (uri: string, options?: Partial<ClientSocketManagerOptions>) =>
-        new __MockClientSocketManager__(uri, options),
+        new ClientSocketManagerStub(uri, options),
     ),
   };
 });
