@@ -57,6 +57,7 @@ const App = () => {
   return (
     <SocketClientProvider
       uri="http://localhost:3000"
+      shouldUseStub={typeof window === "undefined"} // Use stub for SSR
       eventHandlers={{
         onSocketConnection() {
           console.log("Socket connected");
@@ -91,6 +92,7 @@ Wraps your application to provide `ClientSocketManager` client.
 
 - `children`: The React tree to provide the socket client for.
 - `uri`: The URI of the socket server.
+- `shouldUseStub` (optional): When set to `true`, the provider uses a stubbed socket client instead of connecting to a real socket server. This is especially useful for **server-side rendering (SSR)** or **unit testing** scenarios.
 - `options`: (optional): Configuration options for the socket connection.
 
 ##### Options:
@@ -115,7 +117,7 @@ We have extended [socket-io's options](https://socket.io/docs/v4/client-options/
 ### `useSocketClient` Hook:
 
 ```ts
-type ConnectionStatusValues = "connected" | "disconnected" | 'reconnecting';
+type ConnectionStatusValues = "connected" | "disconnected" | "reconnecting";
 
 type SocketClientHookReturnType = {
   /**
