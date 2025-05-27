@@ -3,39 +3,98 @@ import type {
   ClientSocketManagerOptions,
 } from "./types.ts";
 
+/**
+ * A stub implementation of `ClientSocketManager` intended for use in
+ * test environments or server-side rendering (SSR), where actual socket
+ * connections are unnecessary or undesired.
+ *
+ * Provides no-op methods and tracks basic connection/disposal state.
+ */
 class ClientSocketManagerStub {
+  /**
+   * Internal storage for event handler callbacks.
+   */
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
+
+  /**
+   * Tracks whether the socket is currently connected.
+   */
   private _connected = false;
+
+  /**
+   * Tracks whether the socket manager has been disposed.
+   */
   private _disposed = false;
 
+  /**
+   * Indicates this is a mock/stub implementation.
+   */
   public static __mock__ = true;
 
+  /**
+   * Creates a new stubbed ClientSocketManager.
+   *
+   * @param _uri - Optional URI string, ignored in stub.
+   * @param options - Optional configuration object containing event handlers.
+   */
   constructor(_uri?: string, options?: Partial<ClientSocketManagerOptions>) {
     this._inputListeners = options?.eventHandlers ?? {};
   }
 
+  /**
+   * A static session identifier.
+   * Returns a mock ID if connected, otherwise null.
+   */
   public get id(): string | null {
     return this._connected ? "__id__" : null;
   }
 
+  /**
+   * Whether the stub is considered connected.
+   */
   public get connected(): boolean {
     return this._connected;
   }
 
+  /**
+   * Whether the connection has been recovered after interruption.
+   * Always returns false in the stub.
+   */
   public get recovered(): boolean {
     return false;
   }
 
+  /**
+   * Whether the client attempts reconnection automatically.
+   * Always returns false in the stub.
+   */
   public get autoReconnectable(): boolean {
     return false;
   }
 
-  public get disposed() {
+  /**
+   * Whether this instance has been disposed.
+   */
+  public get disposed(): boolean {
     return this._disposed;
   }
 
-  public emit() {}
+  /**
+   * Emits a message to the server.
+   * No-op in stub.
+   *
+   * @param _args - Event name and payload, ignored in stub.
+   */
+  public emit(): void {}
 
+  /**
+   * Subscribes to a socket channel.
+   * No-op in stub.
+   *
+   * @param _channel - Channel name.
+   * @param _cb - Callback function.
+   * @param _options - Optional configuration for signal and subscription completion.
+   */
   public subscribe(
     _channel: string,
     _cb: () => void,
@@ -45,8 +104,19 @@ class ClientSocketManagerStub {
     },
   ): void {}
 
+  /**
+   * Unsubscribes from a socket channel.
+   * No-op in stub.
+   *
+   * @param _channel - Channel name.
+   * @param _cb - Callback function to remove.
+   */
   public unsubscribe(_channel: string, _cb: () => void): void {}
 
+  /**
+   * Simulates connecting to a socket.
+   * Triggers the `onSocketConnection` event handler if defined.
+   */
   public connect(): void {
     this._connected = true;
 
@@ -54,6 +124,10 @@ class ClientSocketManagerStub {
     this._inputListeners.onSocketConnection?.call(this as any);
   }
 
+  /**
+   * Simulates disconnecting the socket.
+   * Triggers the `onSocketDisconnection` event handler if defined.
+   */
   public disconnect(): void {
     this._connected = false;
 
@@ -64,6 +138,9 @@ class ClientSocketManagerStub {
     );
   }
 
+  /**
+   * Cleans up the instance by disconnecting and clearing handlers.
+   */
   public dispose(): void {
     this.disconnect();
 
