@@ -1,11 +1,15 @@
 import * as React from "react";
-import type { ConnectionStatusValues, SocketInstance } from "./types";
+import type {
+  ConnectionStatusValues,
+  SocketInstance,
+  SocketInstanceStub,
+} from "./types";
 
 export type SocketContextValue = {
   /**
    * The socket client instance.
    */
-  socket: SocketInstance | null;
+  socket: SocketInstance | SocketInstanceStub | null;
   /**
    * The connection status of the socket instance.
    */
