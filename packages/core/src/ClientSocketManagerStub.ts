@@ -1,9 +1,9 @@
 import type {
   ClientSocketManagerListenerOptions,
   ClientSocketManagerOptions,
-} from "@tapsioss/client-socket-manager";
+} from "./types.ts";
 
-class ClientSocketManager {
+class ClientSocketManagerStub {
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
   private _connected = false;
   private _disposed = false;
@@ -72,4 +72,4 @@ class ClientSocketManager {
   }
 }
 
-export default ClientSocketManager;
+export default ClientSocketManagerStub;
