@@ -12,7 +12,7 @@ import type {
  */
 class ClientSocketManagerStub {
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
-  
+
   private _connected = false;
   private _disposed = false;
 
