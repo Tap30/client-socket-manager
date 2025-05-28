@@ -7,7 +7,10 @@ on:
       - edited
       - synchronize
       - reopened
-  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   # Enforce that all PRs that change packages need changesets.
