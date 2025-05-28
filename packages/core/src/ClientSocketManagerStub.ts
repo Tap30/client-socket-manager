@@ -11,19 +11,9 @@ import type {
  * Provides no-op methods and tracks basic connection/disposal state.
  */
 class ClientSocketManagerStub {
-  /**
-   * Internal storage for event handler callbacks.
-   */
   private _inputListeners: Partial<ClientSocketManagerListenerOptions>;
-
-  /**
-   * Tracks whether the socket is currently connected.
-   */
+  
   private _connected = false;
-
-  /**
-   * Tracks whether the socket manager has been disposed.
-   */
   private _disposed = false;
 
   /**
