@@ -5,15 +5,25 @@
   "packageManager": "pnpm@9.15.0",
   "private": true,
   "scripts": {
+    "changesets:empty": "changeset add --empty",
+    "changesets:create": "changeset add",
+    "changesets:apply": "changeset version",
+    "changesets:status": "changeset status --since=main",
+    "release": "pnpm build && changeset publish --tag latest",
+    "build": "wireit",
     "test": "vitest",
     "lint": "wireit",
     "dev": "pnpm --filter @repo/playground run dev",
-    "core:release": "pnpm --filter @tapsioss/client-socket-manager run release",
-    "core:build": "wireit",
-    "react:release": "pnpm --filter @tapsioss/react-client-socket-manager run release",
-    "react:build": "wireit"
+    "build:core": "wireit",
+    "build:react": "wireit"
   },
   "wireit": {
+    "build": {
+      "dependencies": [
+        "build:core",
+        "build:react"
+      ]
+    },
     "lint": {
       "dependencies": [
         "lint:ts",
@@ -38,7 +48,7 @@
       ],
       "output": []
     },
-    "react:build": {
+    "build:react": {
       "command": "pnpm --filter @tapsioss/react-client-socket-manager run build",
       "files": [
         "./packages/react/tsconfig.json",
@@ -51,10 +61,10 @@
         "./packages/react/dist/**/*.tsbuildinfo"
       ],
       "dependencies": [
-        "core:build"
+        "build:core"
       ]
     },
-    "core:build": {
+    "build:core": {
       "command": "pnpm --filter @tapsioss/client-socket-manager run build",
       "files": [
         "./packages/core/tsconfig.json",
@@ -69,6 +79,8 @@
     }
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.2",
     "@eslint/js": "^9.21.0",
     "@lit/react": "^1.0.7",
     "@testing-library/dom": "^10.4.0",
@@ -106,6 +118,6 @@
     "typescript-eslint": "^8.25.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.7",
-    "wireit": "^0.14.11"
+    "wireit": "^0.14.12"
   }
 }
