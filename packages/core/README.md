@@ -190,6 +190,40 @@ dispose(): void;
 
 Disposes of the socket, manager, and engine, ensuring all connections are closed and cleaned up.
 
+
+## `ClientSocketManagerStub`
+
+The package also exports a stubbed version of the socket manager for use in **testing** or **server-side rendering (SSR)** environments:
+
+```ts
+import { ClientSocketManagerStub } from '@tapsioss/client-socket-manager';
+
+const stub = new ClientSocketManagerStub("mock://url", {
+  eventHandlers: {
+    onSocketConnection() {
+      console.log("Simulated connection");
+    },
+  },
+});
+
+stub.connect(); // Triggers onSocketConnection
+stub.emit("message", "noop"); // No-op
+stub.dispose(); // Marks the client as disposed
+```
+
+### Why use the stub?
+
+- Prevents actual network communication in unit tests and SSR.
+- Mimics the API surface of the real `ClientSocketManager`.
+- Triggers configured event handlers like `onSocketConnection` and `onSocketDisconnection`.
+
+### Stub Behavior Summary
+
+- Methods like `emit`, `subscribe`, and `unsubscribe` are no-ops.
+- `connect()` and `disconnect()` simulate connection lifecycle events.
+- The `connected`, `disposed`, `id`, and other properties behave consistently with a mock socket.
+
+
 ## License
 
 This project is licensed under the terms of the [MIT license](https://github.com/Tap30/client-socket-manager/blob/main/packages/core/LICENSE).
