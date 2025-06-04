@@ -86,6 +86,8 @@ We have extended [socket-io's options](https://socket.io/docs/v4/client-options/
   - `onAnySubscribedMessageReceived`: Fired when any message is received from a subscribed channel.
   - `onVisiblePage`: Fired when the page's `visibilityState` changes to `visible`.
   - `onHiddenPage`: Fired when the page's `visibilityState` changes to `hidden`.
+- `devtool`: Enables the in-browser DevTool panel for socket debugging. This is useful for development and debugging purposes. In production environments, it's recommended to leave this disabled.
+  
 
 ### Properties:
 
