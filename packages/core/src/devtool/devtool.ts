@@ -1,5 +1,3 @@
-// classes:
-
 import {
   closeIcon,
   Colors,
@@ -133,8 +131,6 @@ const renderLogs = () => {
   `;
 };
 
-// devtool logics:
-
 const initIconButtonSection = () => {
   const iconButtonElement = document.createElement("button");
 
@@ -178,8 +174,6 @@ const initIconButtonSection = () => {
         ...(iconId === DEVTOOL_CLOSE_ICON && { opacity: "0" }),
       });
   });
-
-  // makeDraggable(iconElement);
 };
 
 const initInfoSection = () => {
@@ -282,7 +276,6 @@ const updateUi = () => {
 };
 
 const toggle = () => {
-  // if (!isDragStarted) return;
   const socketIcon = getDevtoolSocketIconElement()!;
   const closeIcon = getDevtoolCloseIconElement()!;
   const info = getDevtoolInfoElement()!;
