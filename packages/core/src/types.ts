@@ -135,4 +135,18 @@ export type ClientSocketManagerOptions = OverrideMembers<
    * Handlers for various events.
    */
   eventHandlers: Partial<ClientSocketManagerListenerOptions>;
+  /**
+   * Enables the in-browser DevTool panel for socket debugging.
+   *
+   * When set to `true`, a floating DevTool UI will appear in the browser that displays:
+   * - The current socket connection status (`connected`, `disconnected`, `reconnecting`)
+   * - A list of currently subscribed channels
+   * - A log panel showing socket events and debugging messages
+   *
+   * This is useful for development and debugging purposes.
+   * In production environments, it's recommended to leave this disabled.
+   *
+   * @default false
+   */
+  devtool?: boolean;
 };

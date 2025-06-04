@@ -1,5 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import { ManagerReservedEvents, SocketReservedEvents } from "./constants.ts";
+import * as devtool from "./devtool/devtool.ts";
 import type {
   ClientSocketManagerListenerOptions,
   ClientSocketManagerOptions,
@@ -27,6 +28,7 @@ class ClientSocketManager<
       reconnectionDelay = 500,
       reconnectionDelayMax = 2000,
       eventHandlers,
+      devtool: devtoolOpt = false,
       ...restOptions
     } = options ?? {};
 
@@ -46,6 +48,10 @@ class ClientSocketManager<
       this._attachManagerEvents();
 
       this._inputListeners.onInit?.call(this);
+
+      if (devtoolOpt) {
+        devtool.init();
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to initialize socket connection", {
@@ -69,10 +75,13 @@ class ClientSocketManager<
       this._inputListeners;
 
     if (onSocketConnection) {
-      this._socket.on(
-        SocketReservedEvents.CONNECTION,
-        onSocketConnection.bind(this),
-      );
+      this._socket.on(SocketReservedEvents.CONNECTION, () => {
+        onSocketConnection.call(this);
+
+        devtool.render(s => {
+          s.status = "connected";
+        });
+      });
     }
 
     if (onSocketConnectionError) {
@@ -84,6 +93,10 @@ class ClientSocketManager<
 
     this._socket.on(SocketReservedEvents.DISCONNECTION, (reason, details) => {
       this._inputListeners.onSocketDisconnection?.call(this, reason, details);
+
+      devtool.render(s => {
+        s.status = "disconnected";
+      });
 
       if (!this.autoReconnectable) {
         if (reason === "io server disconnect") {
@@ -108,10 +121,17 @@ class ClientSocketManager<
     } = this._inputListeners;
 
     if (onConnectionError) {
-      manager.on(
-        ManagerReservedEvents.CONNECTION_ERROR,
-        onConnectionError.bind(this),
-      );
+      manager.on(ManagerReservedEvents.CONNECTION_ERROR, error => {
+        onConnectionError.call(this, error);
+        devtool.render(s => {
+          s.logs.enqueue({
+            type: devtool.LogTypes.CONNECTION_ERROR,
+
+            date: new Date(),
+            detail: error.message,
+          });
+        });
+      });
     }
 
     if (onServerPing) {
@@ -119,28 +139,57 @@ class ClientSocketManager<
     }
 
     if (onReconnecting) {
-      manager.on(ManagerReservedEvents.RECONNECTING, onReconnecting.bind(this));
+      manager.on(ManagerReservedEvents.RECONNECTING, attempt => {
+        onReconnecting.call(this, attempt);
+        devtool.render(s => {
+          s.status = "reconnecting";
+          s.logs.enqueue({
+            type: devtool.LogTypes.RECONNECTING,
+
+            date: new Date(),
+            detail: `Reconnecting... (${attempt} attempt(s))`,
+          });
+        });
+      });
     }
 
     if (onReconnectingError) {
-      manager.on(
-        ManagerReservedEvents.RECONNECTING_ERROR,
-        onReconnectingError.bind(this),
-      );
+      manager.on(ManagerReservedEvents.RECONNECTING_ERROR, error => {
+        onReconnectingError.call(this, error);
+        devtool.render(s => {
+          s.logs.enqueue({
+            type: devtool.LogTypes.RECONNECTING_ERROR,
+            date: new Date(),
+            detail: error.message,
+          });
+        });
+      });
     }
 
     if (onReconnectionFailure) {
-      manager.on(
-        ManagerReservedEvents.RECONNECTION_FAILURE,
-        onReconnectionFailure.bind(this),
-      );
+      manager.on(ManagerReservedEvents.RECONNECTION_FAILURE, () => {
+        onReconnectionFailure.call(this);
+        devtool.render(s => {
+          s.logs.enqueue({
+            type: devtool.LogTypes.RECONNECTION_FAILURE,
+            date: new Date(),
+            detail: `Failed to reconnect.`,
+          });
+        });
+      });
     }
 
     if (onSuccessfulReconnection) {
-      manager.on(
-        ManagerReservedEvents.SUCCESSFUL_RECONNECTION,
-        onSuccessfulReconnection.bind(this),
-      );
+      manager.on(ManagerReservedEvents.SUCCESSFUL_RECONNECTION, attempt => {
+        onSuccessfulReconnection.call(this, attempt);
+        devtool.render(s => {
+          s.logs.enqueue({
+            type: devtool.LogTypes.SUCCESSFUL_RECONNECTION,
+            date: new Date(),
+            detail: `Successfully connected after ${attempt} attempt(s)`,
+          });
+        });
+      });
     }
   }
 
@@ -303,6 +352,15 @@ class ClientSocketManager<
     if (signal?.aborted) unsubscribe();
 
     onSubscriptionComplete?.call(this, channel);
+
+    devtool.render(s => {
+      s.channels.add(channel);
+      s.logs.enqueue({
+        type: devtool.LogTypes.SUBSCRIBED,
+        date: new Date(),
+        detail: `subscribed to \`${channel}\` channel`,
+      });
+    });
   }
 
   /**
@@ -325,6 +383,15 @@ class ClientSocketManager<
 
     if (cb) this._socket.off(channel, cb);
     else this._socket.off(channel);
+
+    devtool.render(s => {
+      s.channels.delete(channel);
+      s.logs.enqueue({
+        type: devtool.LogTypes.UNSUBSCRIBED,
+        date: new Date(),
+        detail: `unsubscribed from \`${channel}\` channel`,
+      });
+    });
   }
 
   /**
@@ -334,6 +401,14 @@ class ClientSocketManager<
     warnDisposedClient(this.disposed);
 
     this._socket?.connect();
+
+    devtool.render(s => {
+      s.logs.enqueue({
+        type: devtool.LogTypes.CONNECTED,
+        date: new Date(),
+        detail: `socket was conneced manually`,
+      });
+    });
   }
 
   /**
@@ -347,6 +422,14 @@ class ClientSocketManager<
     warnDisposedClient(this.disposed);
 
     this._socket?.disconnect();
+
+    devtool.render(s => {
+      s.logs.enqueue({
+        type: devtool.LogTypes.DISCONNECTED,
+        date: new Date(),
+        detail: `socket was disconneced manually`,
+      });
+    });
   }
 
   /**
