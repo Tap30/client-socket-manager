@@ -1,37 +1,37 @@
 import {
   closeIcon,
-  Colors,
-  DEVTOOL_CLOSE_ICON,
-  DEVTOOL_ICON_ID,
+  DEVTOOL_BUTTON_ID,
+  DEVTOOL_CLOSE_ICON_ID,
   DEVTOOL_ID,
   DEVTOOL_INFO_ID,
-  DEVTOOL_SOCKET_ICON,
+  DEVTOOL_SOCKET_ICON_ID,
   LOG_CAPACITY,
-  LogTypeColors,
-  LogTypes,
+  LogType,
+  LogTypeColor,
   socketIcon,
+  Status,
+  StatusColor,
 } from "./constants.ts";
 import { FixedQueue } from "./FixedQueue.ts";
 import { state } from "./states.ts";
 import { type DevtoolState, type Log } from "./types.ts";
 import {
   appendElementToBody,
-  appendElementToDevtool,
+  buttonDefaultStyle,
+  generateAttributes,
+  generateInlineStyle,
   getDevtoolCloseIconElement,
   getDevtoolElement,
+  getDevtoolIconElement,
   getDevtoolInfoElement,
   getDevtoolSocketIconElement,
-} from "./utils/dom.ts";
-import {
-  buttonDefaultStyles,
-  getInlineStyle,
   makeElementDraggable,
-} from "./utils/style.ts";
+} from "./utils.ts";
 
-export { LogTypes };
+export { LogType };
 
 const devtool: DevtoolState = {
-  status: "unknown",
+  status: Status.UNKNOWN,
   channels: new Set(),
   logs: new FixedQueue(LOG_CAPACITY),
 };
@@ -41,14 +41,14 @@ const renderDivider = () => {
 };
 
 const renderChipGroup = (items: string[]) => {
-  const chipStyles = getInlineStyle({
+  const chipStyle = generateInlineStyle({
     "background-color": "#fff4",
     "border-radius": "999px",
     padding: "0 0.5rem",
     "list-style-type": "none",
   });
 
-  const chipGroupStyle = getInlineStyle({
+  const chipGroupStyle = generateInlineStyle({
     margin: "0.5rem 0 0",
     display: "flex",
     gap: "0.5rem",
@@ -56,7 +56,7 @@ const renderChipGroup = (items: string[]) => {
     "flex-wrap": "wrap",
   });
 
-  return `<ul style="${chipGroupStyle}">${items.map(item => `<li style="${chipStyles}">${item}</li>`).join("")}</ul>`;
+  return `<ul style="${chipGroupStyle}">${items.map(item => `<li style="${chipStyle}">${item}</li>`).join("")}</ul>`;
 };
 
 const renderChannels = () => {
@@ -64,22 +64,18 @@ const renderChannels = () => {
 
   if (channels.size === 0) return "";
   return `
-  ${renderDivider()}<code>Channels:</code>${renderChipGroup(Array.from(devtool.channels))}`;
+    ${renderDivider()}
+    <code>Channels:</code>
+    ${renderChipGroup(Array.from(devtool.channels))}
+  `;
 };
 
 const renderStatus = () => {
   const { status } = devtool;
-  let color: string = Colors.GREY;
 
-  if (status === "connected") {
-    color = Colors.GREEN;
-  } else if (status === "disconnected") {
-    color = Colors.RED;
-  } else if (status === "reconnecting") {
-    color = Colors.YELLOW;
-  }
+  const color = StatusColor[status];
 
-  const dotStyle = getInlineStyle({
+  const dotStyle = generateInlineStyle({
     display: "inline-flex",
     width: "0.5rem",
     height: "0.5rem",
@@ -92,35 +88,36 @@ const renderStatus = () => {
 };
 
 const renderLog = (log: Log) => {
-  const titleStyle = getInlineStyle({
-    color: LogTypeColors[log.type],
+  const titleStyle = generateInlineStyle({
+    color: LogTypeColor[log.type],
     margin: "0",
   });
 
-  const detailStyle = getInlineStyle({
+  const detailStyle = generateInlineStyle({
     "font-size": "0.625rem",
     "margin-top": "0",
-    color: LogTypeColors[log.type],
+    color: LogTypeColor[log.type],
   });
 
-  const timeStyle = getInlineStyle({
+  const timeStyle = generateInlineStyle({
     "margin-bottom": "0",
     "font-size": "0.625rem",
     color: "#777",
   });
 
   return `
-  <div>
-    <p style="${timeStyle}">${log.date.toISOString()}</p>
-    <p style="${titleStyle}">${log.type}</p>
-    <p style="${detailStyle}">${log.detail}</p>
-  </details>`;
+    <div>
+      <p style="${timeStyle}">${log.date.toISOString()}</p>
+      <p style="${titleStyle}">${log.type}</p>
+      <p style="${detailStyle}">${log.detail}</p>
+    </div>
+  `;
 };
 
 const renderLogs = () => {
   if (devtool.logs.length === 0) return "";
 
-  const logsContainerStyle = getInlineStyle({
+  const logsContainerStyle = generateInlineStyle({
     "max-height": "20rem",
     overflow: "scroll",
   });
@@ -131,106 +128,106 @@ const renderLogs = () => {
   `;
 };
 
-const initIconButtonSection = () => {
-  const iconButtonElement = document.createElement("button");
-
-  const expandElementsButtonStyle = getInlineStyle({
-    ...buttonDefaultStyles,
-    width: "3rem",
-    height: "3rem",
-    color: "#fff",
-    display: "flex",
-    "justify-content": "center",
-    "align-items": "center",
-    background: "#000c",
-    "backdrop-filter": "blur(4px)",
-    "box-shadow": "0 0 20px 8px #0005",
-    position: "relative",
-    "font-family": "monospace",
-    "font-size": "0.75rem",
-    "line-height": "2",
-    "border-radius": "1.5rem",
+const renderDevtoolIconButton = () => {
+  const attributes = generateAttributes({
+    id: DEVTOOL_BUTTON_ID,
+    style: generateInlineStyle({
+      ...buttonDefaultStyle,
+      width: "3rem",
+      height: "3rem",
+      color: "#fff",
+      display: "flex",
+      "justify-content": "center",
+      "align-items": "center",
+      background: "#000c",
+      "backdrop-filter": "blur(4px)",
+      "box-shadow": "0 0 20px 8px #0005",
+      position: "relative",
+      "font-family": "monospace",
+      "font-size": "0.75rem",
+      "line-height": "2",
+      "border-radius": "1.5rem",
+    }),
   });
 
-  iconButtonElement.id = DEVTOOL_ICON_ID;
-  iconButtonElement.style = expandElementsButtonStyle;
-
-  iconButtonElement.innerHTML = [socketIcon, closeIcon].join("");
-
-  iconButtonElement.addEventListener("click", toggle);
-
-  appendElementToDevtool(iconButtonElement);
-
-  [DEVTOOL_CLOSE_ICON, DEVTOOL_SOCKET_ICON].forEach(iconId => {
-    const buttonIcon = document.getElementById(iconId);
-
-    if (buttonIcon)
-      buttonIcon.style = getInlineStyle({
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        transition: "opacity 0.2s",
-        ...(iconId === DEVTOOL_CLOSE_ICON && { opacity: "0" }),
-      });
-  });
+  return `
+    <button ${attributes}>
+      ${socketIcon}
+      ${closeIcon}
+    </button>
+  `;
 };
 
-const initInfoSection = () => {
-  const infoSection = document.createElement("div");
-
-  infoSection.id = DEVTOOL_INFO_ID;
-
-  infoSection.style = getInlineStyle({
-    padding: "1rem",
-    position: "absolute",
-    background: "#000c",
-    "backdrop-filter": "blur(4px)",
-    "box-shadow": "0 0 20px 8px #0005",
-    color: "#fff",
-    "font-family": "monospace",
-    "font-size": "0.75rem",
-    "line-height": "2",
-    "border-radius": "0.25rem 1rem 1rem 1rem",
-    top: "0",
-    left: "3.5rem",
-    opacity: "0",
-    transform: "scale(0)",
-    "transform-origin": "0 0",
-    transition: "opacity 0.2s, transform 0.2s",
-    width: "12rem",
+const renderDevtoolInfo = () => {
+  const attributes = generateAttributes({
+    id: DEVTOOL_INFO_ID,
+    style: generateInlineStyle({
+      padding: "1rem",
+      position: "absolute",
+      background: "#000c",
+      "backdrop-filter": "blur(4px)",
+      "box-shadow": "0 0 20px 8px #0005",
+      color: "#fff",
+      "font-family": "monospace",
+      "font-size": "0.75rem",
+      "line-height": "2",
+      "border-radius": "0.25rem 1rem 1rem 1rem",
+      top: "0",
+      left: "3.5rem",
+      opacity: "0",
+      transform: "scale(0)",
+      "transform-origin": "0 0",
+      transition: "opacity 0.2s, transform 0.2s",
+      width: "12rem",
+    }),
   });
 
-  appendElementToDevtool(infoSection);
+  return `<div ${attributes}></div>`;
+};
+
+const renderDevtool = () => {
+  const attributes = generateAttributes({
+    id: DEVTOOL_ID,
+    "aria-hidden": "true",
+    style: generateInlineStyle({
+      position: "relative",
+      "box-sizing": "border-box",
+    }),
+  });
+
+  return `
+    <div ${attributes}>
+      ${renderDevtoolIconButton()}
+      ${renderDevtoolInfo()}
+    </div>
+  `;
 };
 
 const updateInfoSection = () => {
   const infoSection = getDevtoolInfoElement()!;
 
-  const devtoolInfoStyles = getInlineStyle({
+  const devtoolInfoStyle = generateInlineStyle({
     background: "#000c",
     padding: "1rem",
     "margin-top": "0.5rem",
     "border-radius": "0.5rem",
   });
 
-  const headerStyle = getInlineStyle({
+  const headerStyle = generateInlineStyle({
     display: "flex",
-
     "align-items": "center",
   });
 
   infoSection.innerHTML = `
     <header style="${headerStyle}">
-
-    <b>Client Socket Manager</b>
+      <b>Client Socket Manager</b>
     </header>
-    <div style="${devtoolInfoStyles}">
-    ${renderStatus()}
-    ${renderChannels()}
-    ${renderLogs()} 
+    <div style="${devtoolInfoStyle}">
+      ${renderStatus()}
+      ${renderChannels()}
+      ${renderLogs()} 
     </div>
-    `;
+  `;
 
   return infoSection;
 };
@@ -238,35 +235,36 @@ const updateInfoSection = () => {
 export const init = () => {
   state.active = true;
 
-  const devtoolElement = document.createElement("div");
-
-  devtoolElement.id = DEVTOOL_ID;
-  devtoolElement.ariaHidden = "true";
-
-  const devtoolStyle = getInlineStyle({
-    position: "relative",
-
-    "box-sizing": "border-box",
-  });
-
-  devtoolElement.style = devtoolStyle;
-
   const devtoolWrapper = document.createElement("div");
 
   devtoolWrapper.style.position = "fixed";
-  devtoolWrapper.appendChild(devtoolElement);
+  devtoolWrapper.innerHTML = renderDevtool();
 
   appendElementToBody(devtoolWrapper);
-  makeElementDraggable(devtoolElement);
+  makeElementDraggable(getDevtoolElement()!);
 
-  initIconButtonSection();
-  initInfoSection();
+  getDevtoolIconElement()!.addEventListener("click", toggle);
+  [DEVTOOL_CLOSE_ICON_ID, DEVTOOL_SOCKET_ICON_ID].forEach(icon => {
+    const buttonIcon = document.getElementById(icon);
+
+    if (buttonIcon) {
+      buttonIcon.style.position = "absolute";
+      buttonIcon.style.top = "50%";
+      buttonIcon.style.left = "50%";
+      buttonIcon.style.transform = "translate(-50%, -50%)";
+      buttonIcon.style.transition = "opacity 0.2s";
+
+      if (icon === DEVTOOL_CLOSE_ICON_ID) {
+        buttonIcon.style.opacity = "0";
+      }
+    }
+  });
 
   updateUi();
 };
 
 const updateUi = () => {
-  const devtoolElement = getDevtoolElement() as HTMLElement;
+  const devtoolElement = getDevtoolElement();
 
   if (!devtoolElement) {
     init();

@@ -1,12 +1,22 @@
-import { state } from "../states.ts";
+import { state } from "./states.ts";
 
-export const getInlineStyle = (cssObject: Record<string, string>): string => {
+export const generateInlineStyle = (
+  cssObject: Record<string, string>,
+): string => {
   return Object.entries(cssObject)
     .map(([cssKey, cssValue]) => `${cssKey}: ${cssValue}`)
     .join("; ");
 };
 
-export const buttonDefaultStyles = {
+export const generateAttributes = (
+  attrObject: Record<string, string>,
+): string => {
+  return Object.entries(attrObject)
+    .map(([cssKey, cssValue]) => `${cssKey}="${cssValue}"`)
+    .join(" ");
+};
+
+export const buttonDefaultStyle = {
   border: "none",
   background: "transparent",
   cursor: "pointer",
@@ -183,3 +193,35 @@ export const makeElementDraggable = (element: HTMLElement) => {
   document.addEventListener("mouseup", handleDragEnd);
   document.addEventListener("touchend", handleDragEnd);
 };
+
+import {
+  DEVTOOL_BUTTON_ID,
+  DEVTOOL_CLOSE_ICON_ID,
+  DEVTOOL_ID,
+  DEVTOOL_INFO_ID,
+  DEVTOOL_SOCKET_ICON_ID,
+} from "./constants.ts";
+
+export const getPageBody = () => {
+  const body = document.getElementsByTagName("body");
+
+  if (!body[0]) {
+    throw new Error("No body tag was found.");
+  }
+
+  return body[0];
+};
+
+export const appendElementToBody = (element: HTMLElement) => {
+  getPageBody().appendChild(element);
+};
+
+export const getDevtoolElement = () => document.getElementById(DEVTOOL_ID);
+export const getDevtoolInfoElement = () =>
+  document.getElementById(DEVTOOL_INFO_ID);
+export const getDevtoolIconElement = () =>
+  document.getElementById(DEVTOOL_BUTTON_ID);
+export const getDevtoolSocketIconElement = () =>
+  document.getElementById(DEVTOOL_SOCKET_ICON_ID);
+export const getDevtoolCloseIconElement = () =>
+  document.getElementById(DEVTOOL_CLOSE_ICON_ID);

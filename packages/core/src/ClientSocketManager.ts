@@ -1,5 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import { ManagerReservedEvents, SocketReservedEvents } from "./constants.ts";
+import { Status } from "./devtool/constants.ts";
 import * as devtool from "./devtool/devtool.ts";
 import type {
   ClientSocketManagerListenerOptions,
@@ -79,7 +80,7 @@ class ClientSocketManager<
         onSocketConnection.call(this);
 
         devtool.render(s => {
-          s.status = "connected";
+          s.status = Status.CONNECTED;
         });
       });
     }
@@ -95,7 +96,7 @@ class ClientSocketManager<
       this._inputListeners.onSocketDisconnection?.call(this, reason, details);
 
       devtool.render(s => {
-        s.status = "disconnected";
+        s.status = Status.DISCONNECTED;
       });
 
       if (!this.autoReconnectable) {
@@ -125,7 +126,7 @@ class ClientSocketManager<
         onConnectionError.call(this, error);
         devtool.render(s => {
           s.logs.enqueue({
-            type: devtool.LogTypes.CONNECTION_ERROR,
+            type: devtool.LogType.CONNECTION_ERROR,
 
             date: new Date(),
             detail: error.message,
@@ -142,9 +143,9 @@ class ClientSocketManager<
       manager.on(ManagerReservedEvents.RECONNECTING, attempt => {
         onReconnecting.call(this, attempt);
         devtool.render(s => {
-          s.status = "reconnecting";
+          s.status = Status.RECONNECTING;
           s.logs.enqueue({
-            type: devtool.LogTypes.RECONNECTING,
+            type: devtool.LogType.RECONNECTING,
 
             date: new Date(),
             detail: `Reconnecting... (${attempt} attempt(s))`,
@@ -158,7 +159,7 @@ class ClientSocketManager<
         onReconnectingError.call(this, error);
         devtool.render(s => {
           s.logs.enqueue({
-            type: devtool.LogTypes.RECONNECTING_ERROR,
+            type: devtool.LogType.RECONNECTING_ERROR,
             date: new Date(),
             detail: error.message,
           });
@@ -171,7 +172,7 @@ class ClientSocketManager<
         onReconnectionFailure.call(this);
         devtool.render(s => {
           s.logs.enqueue({
-            type: devtool.LogTypes.RECONNECTION_FAILURE,
+            type: devtool.LogType.RECONNECTION_FAILURE,
             date: new Date(),
             detail: `Failed to reconnect.`,
           });
@@ -184,7 +185,7 @@ class ClientSocketManager<
         onSuccessfulReconnection.call(this, attempt);
         devtool.render(s => {
           s.logs.enqueue({
-            type: devtool.LogTypes.SUCCESSFUL_RECONNECTION,
+            type: devtool.LogType.SUCCESSFUL_RECONNECTION,
             date: new Date(),
             detail: `Successfully connected after ${attempt} attempt(s)`,
           });
@@ -356,7 +357,7 @@ class ClientSocketManager<
     devtool.render(s => {
       s.channels.add(channel);
       s.logs.enqueue({
-        type: devtool.LogTypes.SUBSCRIBED,
+        type: devtool.LogType.SUBSCRIBED,
         date: new Date(),
         detail: `subscribed to \`${channel}\` channel`,
       });
@@ -387,7 +388,7 @@ class ClientSocketManager<
     devtool.render(s => {
       s.channels.delete(channel);
       s.logs.enqueue({
-        type: devtool.LogTypes.UNSUBSCRIBED,
+        type: devtool.LogType.UNSUBSCRIBED,
         date: new Date(),
         detail: `unsubscribed from \`${channel}\` channel`,
       });
@@ -404,7 +405,7 @@ class ClientSocketManager<
 
     devtool.render(s => {
       s.logs.enqueue({
-        type: devtool.LogTypes.CONNECTED,
+        type: devtool.LogType.CONNECTED,
         date: new Date(),
         detail: `socket was conneced manually`,
       });
@@ -425,7 +426,7 @@ class ClientSocketManager<
 
     devtool.render(s => {
       s.logs.enqueue({
-        type: devtool.LogTypes.DISCONNECTED,
+        type: devtool.LogType.DISCONNECTED,
         date: new Date(),
         detail: `socket was disconneced manually`,
       });

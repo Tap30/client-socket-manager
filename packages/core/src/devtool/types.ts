@@ -1,14 +1,14 @@
-import { type LogTypes } from "./constants.ts";
+import { type LogType, type Status } from "./constants.ts";
 import { type FixedQueue } from "./FixedQueue.ts";
 
 export type Log = {
-  type: (typeof LogTypes)[keyof typeof LogTypes];
+  type: (typeof LogType)[keyof typeof LogType];
   detail: string;
   date: Date;
 };
 
 export type DevtoolState = {
-  status: "reconnecting" | "connected" | "disconnected" | "unknown";
+  status: (typeof Status)[keyof typeof Status];
   channels: Set<string>;
   logs: FixedQueue<Log>;
 };
