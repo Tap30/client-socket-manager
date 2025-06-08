@@ -1,4 +1,12 @@
-import { state } from "./states.ts";
+// Drag tracking state
+let x = 0;
+let y = 0;
+let initialX = x;
+let initialY = y;
+let startX = 0;
+let startY = 0;
+let didMove = false;
+let isDragStarted = false;
 
 export const generateInlineStyle = (
   cssObject: Record<string, string>,
@@ -9,18 +17,17 @@ export const generateInlineStyle = (
 };
 
 export const generateAttributes = (
-  attrObject: Record<string, string>,
+  attrObject: Record<string, string | boolean>,
 ): string => {
   return Object.entries(attrObject)
-    .map(([cssKey, cssValue]) => `${cssKey}="${cssValue}"`)
+    .map(([cssKey, cssValue]) =>
+      typeof cssValue == "boolean"
+        ? cssValue
+          ? cssKey
+          : ""
+        : `${cssKey}="${cssValue}"`,
+    )
     .join(" ");
-};
-
-export const buttonDefaultStyle = {
-  border: "none",
-  background: "transparent",
-  cursor: "pointer",
-  "-webkit-tap-highlight-color": "transparent",
 };
 
 /**
@@ -47,10 +54,6 @@ export const buttonDefaultStyle = {
  * @param element - The HTMLElement to make draggable
  */
 export const makeElementDraggable = (element: HTMLElement) => {
-  // ========================
-  // Helper functions
-  // ========================
-
   // Extract clientX from MouseEvent or TouchEvent
   const getClientX = (event: MouseEvent | TouchEvent) => {
     if (event instanceof MouseEvent) return event.clientX;
@@ -65,53 +68,13 @@ export const makeElementDraggable = (element: HTMLElement) => {
     return 0;
   };
 
-  // Get required bounding box of element, optionally accounting for transform scaling
-  const getBoundingClientRect = (
-    element: HTMLElement,
-    includeScale = false,
-  ): {
-    width: number;
-    height: number;
-    top: number;
-    left: number;
-  } => {
-    const clientRect = element.getBoundingClientRect();
-
-    let scaleX = 1;
-    let scaleY = 1;
-
-    if (includeScale) {
-      scaleX =
-        element.offsetWidth > 0
-          ? Math.round(clientRect.width) / element.offsetWidth || 1
-          : 1;
-      scaleY =
-        element.offsetHeight > 0
-          ? Math.round(clientRect.height) / element.offsetHeight || 1
-          : 1;
-    }
-
-    return {
-      width: clientRect.width / scaleX,
-      height: clientRect.height / scaleY,
-      top: clientRect.top / scaleY,
-      left: clientRect.left / scaleX,
-    };
-  };
-
   // Suppress click after drag to avoid unintentional tap
   const suppressClickOnce = (e: MouseEvent) => {
     if (didMove) {
       e.stopPropagation();
       e.preventDefault();
     }
-
-    document.removeEventListener("click", suppressClickOnce, true);
   };
-
-  // ========================
-  // Event handlers
-  // ========================
 
   const handleDragStart = (event: MouseEvent | TouchEvent) => {
     const clientX = getClientX(event);
@@ -119,16 +82,16 @@ export const makeElementDraggable = (element: HTMLElement) => {
 
     startX = clientX;
     startY = clientY;
+    initialX = x;
+    initialY = y;
     didMove = false;
-
+    isDragStarted = true;
     // Attach temporary click suppressor for post-drag click prevention
     document.addEventListener("click", suppressClickOnce, true);
-
-    state.isDragStarted = true;
   };
 
   const handleDragging = (event: MouseEvent | TouchEvent) => {
-    if (!state.isDragStarted) return;
+    if (!isDragStarted) return;
 
     const clientX = getClientX(event);
     const clientY = getClientY(event);
@@ -146,82 +109,30 @@ export const makeElementDraggable = (element: HTMLElement) => {
       event.preventDefault();
       event.stopPropagation();
 
-      // Move the element centered on pointer
-      const { width, height } = getBoundingClientRect(element);
+      x = initialX + deltaX;
+      y = initialY + deltaY;
 
-      x = clientX - width / 2;
-      y = clientY - height / 2;
       element.style.transform = `translate(${x}px, ${y}px)`;
     }
   };
 
-  const handleDragEnd = (e: MouseEvent | TouchEvent) => {
-    if (!state.isDragStarted) return;
+  const handleDragEnd = () => {
+    if (!isDragStarted) return;
 
-    state.isDragStarted = false;
+    isDragStarted = false;
 
-    // Prevent mouse-based click only; touch clicks will work fine
-    if (e.type === "mouseup") {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    document.removeEventListener("click", suppressClickOnce, true);
   };
-
-  // ========================
-  // Initialize
-  // ========================
 
   // Disable browser-native touch gestures (scroll, nav swipe)
   element.style.touchAction = "none";
 
-  // Set initial position based on bounding box
-  const { top: initialTop, left: initialLeft } = getBoundingClientRect(element);
-  let x = initialLeft;
-  let y = initialTop;
+  element.addEventListener("touchstart", handleDragStart, false);
+  element.addEventListener("mousedown", handleDragStart, false);
 
-  // Drag tracking state
-  let startX = 0;
-  let startY = 0;
-  let didMove = false;
+  document.addEventListener("mousemove", handleDragging, false);
+  document.addEventListener("touchmove", handleDragging, false);
 
-  element.addEventListener("touchstart", handleDragStart);
-  element.addEventListener("mousedown", handleDragStart);
-
-  document.addEventListener("mousemove", handleDragging);
-  document.addEventListener("touchmove", handleDragging);
-
-  document.addEventListener("mouseup", handleDragEnd);
-  document.addEventListener("touchend", handleDragEnd);
+  document.addEventListener("mouseup", handleDragEnd, false);
+  document.addEventListener("touchend", handleDragEnd, false);
 };
-
-import {
-  DEVTOOL_BUTTON_ID,
-  DEVTOOL_CLOSE_ICON_ID,
-  DEVTOOL_ID,
-  DEVTOOL_INFO_ID,
-  DEVTOOL_SOCKET_ICON_ID,
-} from "./constants.ts";
-
-export const getPageBody = () => {
-  const body = document.getElementsByTagName("body");
-
-  if (!body[0]) {
-    throw new Error("No body tag was found.");
-  }
-
-  return body[0];
-};
-
-export const appendElementToBody = (element: HTMLElement) => {
-  getPageBody().appendChild(element);
-};
-
-export const getDevtoolElement = () => document.getElementById(DEVTOOL_ID);
-export const getDevtoolInfoElement = () =>
-  document.getElementById(DEVTOOL_INFO_ID);
-export const getDevtoolIconElement = () =>
-  document.getElementById(DEVTOOL_BUTTON_ID);
-export const getDevtoolSocketIconElement = () =>
-  document.getElementById(DEVTOOL_SOCKET_ICON_ID);
-export const getDevtoolCloseIconElement = () =>
-  document.getElementById(DEVTOOL_CLOSE_ICON_ID);

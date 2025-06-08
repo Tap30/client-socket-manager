@@ -452,6 +452,8 @@ class ClientSocketManager<
     this._socket = null;
     this._inputListeners = {};
     this._disposed = true;
+
+    devtool.dispose();
   }
 }
 

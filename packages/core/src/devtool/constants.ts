@@ -1,7 +1,9 @@
 export const LOG_CAPACITY = 20;
 export const DEVTOOL_ID = "tapsi-socket-client-devtool";
+export const DEVTOOL_WRAPPER_ID = "tapsi-socket-client-devtool-wrapper";
 export const DEVTOOL_BUTTON_ID = `${DEVTOOL_ID}-button`;
 export const DEVTOOL_INFO_ID = `${DEVTOOL_ID}-info`;
+export const DEVTOOL_LOGS_SECTION_ID = `${DEVTOOL_ID}-logs`;
 export const DEVTOOL_SOCKET_ICON_ID = `${DEVTOOL_BUTTON_ID}-socket`;
 export const DEVTOOL_CLOSE_ICON_ID = `${DEVTOOL_BUTTON_ID}-close`;
 
