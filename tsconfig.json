@@ -4,15 +4,17 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "skipLibCheck": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
     "allowJs": false,
     "checkJs": false,
-
     "strict": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
@@ -24,11 +26,11 @@
     "noUnusedLocals": true,
     "noImplicitAny": true,
     "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "jsx": "react-jsx",
-
     "paths": {
       // Core package
       "@tapsioss/client-socket-manager": [
@@ -36,9 +38,17 @@
         "./packages/core/src"
       ],
       // Test helpers package
-      "@repo/test-helpers": ["./test-helpers/src"]
+      "@repo/test-helpers": [
+        "./test-helpers/src"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
