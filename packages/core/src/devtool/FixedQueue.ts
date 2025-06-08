@@ -7,6 +7,7 @@
  */
 export class FixedQueue<T> {
   private _queue: T[] = [];
+  private _maxLength: number;
 
   /**
    * Creates a FixedQueue instance with a maximum length.
@@ -26,10 +27,12 @@ export class FixedQueue<T> {
    * console.log(queue.length); // 3
    * ```
    */
-  constructor(private readonly maxLength: number) {
+  constructor(maxLength: number) {
     if (!Number.isInteger(maxLength) || maxLength <= 0) {
       throw new Error("maxLength must be a positive integer");
     }
+
+    this._maxLength = maxLength;
   }
 
   /**
@@ -39,7 +42,7 @@ export class FixedQueue<T> {
    * @param item - The item to enqueue.
    */
   enqueue(item: T): void {
-    if (this._queue.length >= this.maxLength) {
+    if (this._queue.length >= this._maxLength) {
       this._queue.shift(); // Remove oldest
     }
 
