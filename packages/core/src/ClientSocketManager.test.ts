@@ -14,6 +14,7 @@ import {
   expect,
   it,
 } from "vitest";
+import { getDevtoolElement } from "./devtool/devtool.ts";
 import { ClientSocketManager } from "./index.ts";
 
 describe("ClientSocketManager: unit tests", () => {
@@ -290,5 +291,16 @@ describe("ClientSocketManager: unit tests", () => {
 
     expect(socketManager.connected).toBe(false);
     expect(socketManager.disposed).toBe(true);
+  });
+
+  it("should show devtool when the `devtool` option is true", () => {
+    socketManager = new ClientSocketManager(socketServerUri, {});
+    expect(getDevtoolElement()).toBeNull();
+    socketManager.dispose();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: true,
+    });
+    expect(getDevtoolElement()).not.toBeNull();
   });
 });
