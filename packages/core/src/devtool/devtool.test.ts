@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
 import {
   DEVTOOL_LOGS_SECTION_ID,
   DEVTOOL_WRAPPER_ID,

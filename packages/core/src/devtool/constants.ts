@@ -7,7 +7,7 @@ export const DEVTOOL_LOGS_SECTION_ID = `${DEVTOOL_ID}-logs`;
 export const DEVTOOL_SOCKET_ICON_ID = `${DEVTOOL_BUTTON_ID}-socket`;
 export const DEVTOOL_CLOSE_ICON_ID = `${DEVTOOL_BUTTON_ID}-close`;
 
-export const Color = {
+export const StatusColor = {
   GREEN: "#3fb950",
   RED: "#f85149",
   YELLOW: "#d29922",
@@ -21,14 +21,14 @@ export const Status = {
   UNKNOWN: "UNKNOWN",
 } as const;
 
-export const StatusColor: Record<
+export const StatusColorMap: Record<
   (typeof Status)[keyof typeof Status],
-  (typeof Color)[keyof typeof Color]
+  (typeof StatusColor)[keyof typeof StatusColor]
 > = {
-  RECONNECTING: Color.YELLOW,
-  CONNECTED: Color.GREEN,
-  DISCONNECTED: Color.RED,
-  UNKNOWN: Color.GREY,
+  RECONNECTING: StatusColor.YELLOW,
+  CONNECTED: StatusColor.GREEN,
+  DISCONNECTED: StatusColor.RED,
+  UNKNOWN: StatusColor.GREY,
 } as const;
 
 export const LogType = {
@@ -45,17 +45,17 @@ export const LogType = {
 
 export const LogTypeColor: Record<
   (typeof LogType)[keyof typeof LogType],
-  (typeof Color)[keyof typeof Color]
+  (typeof StatusColorMap)[keyof typeof StatusColorMap]
 > = {
-  SUCCESSFUL_RECONNECTION: Color.GREEN,
-  SUBSCRIBED: Color.GREEN,
-  RECONNECTION_FAILURE: Color.RED,
-  RECONNECTING: Color.YELLOW,
-  CONNECTION_ERROR: Color.RED,
-  RECONNECTING_ERROR: Color.RED,
-  UNSUBSCRIBED: Color.RED,
-  CONNECTED: Color.GREEN,
-  DISCONNECTED: Color.RED,
+  SUCCESSFUL_RECONNECTION: StatusColor.GREEN,
+  SUBSCRIBED: StatusColor.GREEN,
+  RECONNECTION_FAILURE: StatusColor.RED,
+  RECONNECTING: StatusColor.YELLOW,
+  CONNECTION_ERROR: StatusColor.RED,
+  RECONNECTING_ERROR: StatusColor.RED,
+  UNSUBSCRIBED: StatusColor.RED,
+  CONNECTED: StatusColor.GREEN,
+  DISCONNECTED: StatusColor.RED,
 } as const;
 
 export const socketIcon = `

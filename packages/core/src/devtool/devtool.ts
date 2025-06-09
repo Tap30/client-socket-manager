@@ -12,7 +12,7 @@ import {
   LogTypeColor,
   socketIcon,
   Status,
-  StatusColor,
+  StatusColorMap,
 } from "./constants.ts";
 import { FixedQueue } from "./FixedQueue.ts";
 import { type DevtoolState, type Log } from "./types.ts";
@@ -27,6 +27,16 @@ const buttonDefaultStyle = {
   background: "transparent",
   cursor: "pointer",
   "-webkit-tap-highlight-color": "transparent",
+};
+
+const baseThemeStyle = {
+  color: "#fff",
+  background: "#000c",
+  "backdrop-filter": "blur(0.25rem)",
+  "box-shadow": "0 0 1.25rem 0.5rem #0005",
+  "font-family": "monospace",
+  "font-size": "0.75rem",
+  "line-height": "2",
 };
 
 const nonAccessibleAttributes = {
@@ -44,7 +54,7 @@ let active = false;
 let expanded = false;
 
 export const renderDivider = () => {
-  return `<hr color="#222222">`;
+  return `<hr color="#222222" />`;
 };
 
 export const renderChipGroup = (items: string[]) => {
@@ -94,7 +104,7 @@ export const renderChannels = () => {
 export const renderStatus = () => {
   const { status } = devtool;
 
-  const color = StatusColor[status];
+  const color = StatusColorMap[status];
 
   const dotStyle = generateInlineStyle({
     display: "inline-flex",
@@ -102,7 +112,7 @@ export const renderStatus = () => {
     height: "0.5rem",
     "border-radius": "50%",
     "background-color": color,
-    "box-shadow": `0 0 20px 2px ${color}`,
+    "box-shadow": `0 0 1.25rem 0.125rem ${color}`,
   });
 
   return `<code>Status: ${status} <span style="${dotStyle}"></span></code>`;
@@ -159,19 +169,13 @@ export const renderDevtoolIconButton = () => {
     ...nonAccessibleAttributes,
     style: generateInlineStyle({
       ...buttonDefaultStyle,
+      ...baseThemeStyle,
       width: "3rem",
       height: "3rem",
-      color: "#fff",
       display: "flex",
       "justify-content": "center",
       "align-items": "center",
-      background: "#000c",
-      "backdrop-filter": "blur(4px)",
-      "box-shadow": "0 0 20px 8px #0005",
       position: "relative",
-      "font-family": "monospace",
-      "font-size": "0.75rem",
-      "line-height": "2",
       "border-radius": "1.5rem",
     }),
   });
@@ -191,15 +195,10 @@ export const renderDevtoolInfo = () => {
     "data-testid": DEVTOOL_INFO_ID,
     ...nonAccessibleAttributes,
     style: generateInlineStyle({
+      ...baseThemeStyle,
       padding: "1rem",
       position: "absolute",
       background: "#000c",
-      "backdrop-filter": "blur(4px)",
-      "box-shadow": "0 0 20px 8px #0005",
-      color: "#fff",
-      "font-family": "monospace",
-      "font-size": "0.75rem",
-      "line-height": "2",
       "border-radius": "0.25rem 1rem 1rem 1rem",
       top: "0",
       left: "3.5rem",

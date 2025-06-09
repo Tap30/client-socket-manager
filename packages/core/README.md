@@ -60,7 +60,7 @@ socketManager.subscribe('message', (msg) => {
 ### Constructor
 
 ```ts
-constructor(uri: string, options?: Partial<ClientSocketManagerOptions>)
+constructor(uri: string, options?: ClientSocketManagerOptions)
 ```
 
 #### Parameters:

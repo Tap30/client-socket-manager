@@ -21,7 +21,7 @@ class ClientSocketManager<
 
   private _socket: Socket<ListenEvents, EmitEvents> | null = null;
 
-  private _inputListeners: Partial<ClientSocketManagerListenerOptions> = {};
+  private _inputListeners: ClientSocketManagerListenerOptions = {};
 
   constructor(uri: string, options?: Partial<ClientSocketManagerOptions>) {
     const {
@@ -72,23 +72,18 @@ class ClientSocketManager<
   private _attachSocketEvents(): void {
     if (!this._socket) return;
 
-    const { onSocketConnection, onSocketConnectionError } =
-      this._inputListeners;
+    this._socket.on(SocketReservedEvents.CONNECTION, () => {
+      this._inputListeners.onSocketConnection?.call(this);
 
-    if (onSocketConnection) {
-      this._socket.on(SocketReservedEvents.CONNECTION, () => {
-        onSocketConnection.call(this);
-
-        devtool.render(s => {
-          s.status = Status.CONNECTED;
-        });
+      devtool.render(s => {
+        s.status = Status.CONNECTED;
       });
-    }
+    });
 
-    if (onSocketConnectionError) {
+    if (this._inputListeners.onSocketConnectionError) {
       this._socket.on(
         SocketReservedEvents.CONNECTION_ERROR,
-        onSocketConnectionError.bind(this),
+        this._inputListeners.onSocketConnectionError.bind(this),
       );
     }
 
@@ -154,44 +149,38 @@ class ClientSocketManager<
       });
     }
 
-    if (onReconnectingError) {
-      manager.on(ManagerReservedEvents.RECONNECTING_ERROR, error => {
-        onReconnectingError.call(this, error);
-        devtool.render(s => {
-          s.logs.enqueue({
-            type: devtool.LogType.RECONNECTING_ERROR,
-            date: new Date(),
-            detail: error.message,
-          });
+    manager.on(ManagerReservedEvents.RECONNECTING_ERROR, error => {
+      onReconnectingError?.call(this, error);
+      devtool.render(s => {
+        s.logs.enqueue({
+          type: devtool.LogType.RECONNECTING_ERROR,
+          date: new Date(),
+          detail: error.message,
         });
       });
-    }
+    });
 
-    if (onReconnectionFailure) {
-      manager.on(ManagerReservedEvents.RECONNECTION_FAILURE, () => {
-        onReconnectionFailure.call(this);
-        devtool.render(s => {
-          s.logs.enqueue({
-            type: devtool.LogType.RECONNECTION_FAILURE,
-            date: new Date(),
-            detail: `Failed to reconnect.`,
-          });
+    manager.on(ManagerReservedEvents.RECONNECTION_FAILURE, () => {
+      onReconnectionFailure?.call(this);
+      devtool.render(s => {
+        s.logs.enqueue({
+          type: devtool.LogType.RECONNECTION_FAILURE,
+          date: new Date(),
+          detail: `Failed to reconnect.`,
         });
       });
-    }
+    });
 
-    if (onSuccessfulReconnection) {
-      manager.on(ManagerReservedEvents.SUCCESSFUL_RECONNECTION, attempt => {
-        onSuccessfulReconnection.call(this, attempt);
-        devtool.render(s => {
-          s.logs.enqueue({
-            type: devtool.LogType.SUCCESSFUL_RECONNECTION,
-            date: new Date(),
-            detail: `Successfully connected after ${attempt} attempt(s)`,
-          });
+    manager.on(ManagerReservedEvents.SUCCESSFUL_RECONNECTION, attempt => {
+      onSuccessfulReconnection?.call(this, attempt);
+      devtool.render(s => {
+        s.logs.enqueue({
+          type: devtool.LogType.SUCCESSFUL_RECONNECTION,
+          date: new Date(),
+          detail: `Successfully connected after ${attempt} attempt(s)`,
         });
       });
-    }
+    });
   }
 
   private _detachPageEvents(): void {
