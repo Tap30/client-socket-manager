@@ -1,11 +1,13 @@
 import {
   closeIcon,
   DEVTOOL_BUTTON_ID,
+  DEVTOOL_CHANNELS_ID,
   DEVTOOL_CLOSE_ICON_ID,
   DEVTOOL_ID,
   DEVTOOL_INFO_ID,
   DEVTOOL_LOGS_SECTION_ID,
   DEVTOOL_SOCKET_ICON_ID,
+  DEVTOOL_STATUS_ID,
   DEVTOOL_WRAPPER_ID,
   LOG_CAPACITY,
   LogType,
@@ -73,10 +75,14 @@ export const renderChipGroup = (items: string[]) => {
     "flex-wrap": "wrap",
   });
 
-  return `<ul style="${chipGroupStyle}">${items.map(item => `<li style="${chipStyle}">${item}</li>`).join("")}</ul>`;
+  return `<ul id="${DEVTOOL_CHANNELS_ID}" style="${chipGroupStyle}">${items.map(item => `<li style="${chipStyle}">${item}</li>`).join("")}</ul>`;
 };
 
 export const getDevtoolElement = () => document.getElementById(DEVTOOL_ID);
+export const getDevtoolChannelsElement = () =>
+  document.getElementById(DEVTOOL_CHANNELS_ID);
+export const getDevtoolStatusElement = () =>
+  document.getElementById(DEVTOOL_STATUS_ID);
 export const getDevtoolLogSectionElement = () =>
   document.getElementById(DEVTOOL_LOGS_SECTION_ID);
 export const getDevtoolWrapperElement = () =>
@@ -115,7 +121,7 @@ export const renderStatus = () => {
     "box-shadow": `0 0 1.25rem 0.125rem ${color}`,
   });
 
-  return `<code>Status: ${status} <span style="${dotStyle}"></span></code>`;
+  return `<code>Status: <span id="${DEVTOOL_STATUS_ID}">${status}</span> <span style="${dotStyle}"></span></code>`;
 };
 
 export const renderLog = (log: Log) => {
@@ -331,4 +337,4 @@ export const render = (cb: (s: typeof devtool) => void) => {
   updateUi();
 };
 
-export { LogType };
+export { LogType, Status };

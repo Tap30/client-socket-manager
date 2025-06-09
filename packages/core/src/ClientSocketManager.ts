@@ -1,6 +1,5 @@
 import { io, type Socket } from "socket.io-client";
 import { ManagerReservedEvents, SocketReservedEvents } from "./constants.ts";
-import { Status } from "./devtool/constants.ts";
 import * as devtool from "./devtool/devtool.ts";
 import type {
   ClientSocketManagerListenerOptions,
@@ -76,7 +75,7 @@ class ClientSocketManager<
       this._inputListeners.onSocketConnection?.call(this);
 
       devtool.render(s => {
-        s.status = Status.CONNECTED;
+        s.status = devtool.Status.CONNECTED;
       });
     });
 
@@ -91,7 +90,7 @@ class ClientSocketManager<
       this._inputListeners.onSocketDisconnection?.call(this, reason, details);
 
       devtool.render(s => {
-        s.status = Status.DISCONNECTED;
+        s.status = devtool.Status.DISCONNECTED;
       });
 
       if (!this.autoReconnectable) {
@@ -138,7 +137,7 @@ class ClientSocketManager<
       manager.on(ManagerReservedEvents.RECONNECTING, attempt => {
         onReconnecting.call(this, attempt);
         devtool.render(s => {
-          s.status = Status.RECONNECTING;
+          s.status = devtool.Status.RECONNECTING;
           s.logs.enqueue({
             type: devtool.LogType.RECONNECTING,
 
