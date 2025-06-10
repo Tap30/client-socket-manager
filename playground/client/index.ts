@@ -42,6 +42,7 @@ const socketManager = new ClientSocketManager("http://localhost:3000", {
       console.log("socket successfully reconnected", attempt);
     },
   },
+  devtool: true,
 });
 
 const createButton = (text: string) => {

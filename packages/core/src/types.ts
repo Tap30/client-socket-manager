@@ -25,63 +25,63 @@ export type ClientSocketManagerListenerOptions = {
   /**
    * Fired upon instantiation.
    */
-  onInit: (this: ClientSocketManager) => void;
+  onInit?: (this: ClientSocketManager) => void;
   /**
    * Fired upon disposal.
    */
-  onDispose: (this: ClientSocketManager) => void;
+  onDispose?: (this: ClientSocketManager) => void;
   /**
    * Fired upon a connection error.
    *
    * @param err - The connection error instance.
    */
-  onConnectionError: (this: ClientSocketManager, err: Error) => void;
+  onConnectionError?: (this: ClientSocketManager, err: Error) => void;
   /**
    * Fired when a ping packet is received from the server.
    */
-  onServerPing: (this: ClientSocketManager) => void;
+  onServerPing?: (this: ClientSocketManager) => void;
   /**
    * Fired upon an attempt to reconnect.
    *
    * @param attempt - The number of reconnection attempts.
    */
-  onReconnecting: (this: ClientSocketManager, attempt: number) => void;
+  onReconnecting?: (this: ClientSocketManager, attempt: number) => void;
   /**
    * Fired upon a reconnection attempt error.
    *
    * @param err - The reconnection attempt error instance.
    */
-  onReconnectingError: (this: ClientSocketManager, err: Error) => void;
+  onReconnectingError?: (this: ClientSocketManager, err: Error) => void;
   /**
    * Fired when couldn't reconnect within `reconnectionAttempts`.
    */
-  onReconnectionFailure: (this: ClientSocketManager) => void;
+  onReconnectionFailure?: (this: ClientSocketManager) => void;
   /**
    * Fired upon a successful reconnection.
    *
    * @param attempt - The number of reconnection attempts.
    */
-  onSuccessfulReconnection: (
+  onSuccessfulReconnection?: (
     this: ClientSocketManager,
     attempt: number,
   ) => void;
   /**
    * This event is fired by the Socket instance upon connection and reconnection.
    */
-  onSocketConnection: (this: ClientSocketManager) => void;
+  onSocketConnection?: (this: ClientSocketManager) => void;
   /**
    * This event is fired upon connection failure.
    *
    * @param err - The connection error instance.
    */
-  onSocketConnectionError: (this: ClientSocketManager, err: Error) => void;
+  onSocketConnectionError?: (this: ClientSocketManager, err: Error) => void;
   /**
    * This event is fired upon disconnection.
    *
    * @param reason - The reason of disconnection.
    * @param details - The details of the disconnection.
    */
-  onSocketDisconnection: (
+  onSocketDisconnection?: (
     this: ClientSocketManager,
     reason: Socket.DisconnectReason,
     details?: DisconnectDescription,
@@ -92,7 +92,7 @@ export type ClientSocketManagerListenerOptions = {
    * The page content may be at least partially visible.
    * In practice this means that the page is the foreground tab of a non-minimized window.
    */
-  onVisiblePage: (this: ClientSocketManager) => void;
+  onVisiblePage?: (this: ClientSocketManager) => void;
   /**
    * This callback is fired when page's `visibilityState` changes to `hidden`.
    *
@@ -100,14 +100,14 @@ export type ClientSocketManagerListenerOptions = {
    * the document's tab being in the background or part of a window that is
    * minimized, or because the device's screen is off.
    */
-  onHiddenPage: (this: ClientSocketManager) => void;
+  onHiddenPage?: (this: ClientSocketManager) => void;
   /**
    * The callback is fired when any message is received from a subscribed channel.
    *
    * @param channel - The name of the channel from which the message is received.
    * @param received - The data received from the channel.
    */
-  onAnySubscribedMessageReceived: (
+  onAnySubscribedMessageReceived?: (
     this: ClientSocketManager,
     channel: string,
     received: any[],
@@ -115,24 +115,38 @@ export type ClientSocketManagerListenerOptions = {
 };
 
 export type ClientSocketManagerOptions = OverrideMembers<
-  ManagerOptions & SocketOptions,
+  Partial<ManagerOptions> & SocketOptions,
   {
     /**
      * The time delay in milliseconds between reconnection attempts.
      *
      * @default 500
      */
-    reconnectionDelay: number;
+    reconnectionDelay?: number;
     /**
      * The max time delay in milliseconds between reconnection attempts.
      *
      * @default 2000
      */
-    reconnectionDelayMax: number;
+    reconnectionDelayMax?: number;
   }
 > & {
   /**
    * Handlers for various events.
    */
-  eventHandlers: Partial<ClientSocketManagerListenerOptions>;
+  eventHandlers?: ClientSocketManagerListenerOptions;
+  /**
+   * Enables the in-browser DevTool panel for socket debugging.
+   *
+   * When set to `true`, a floating DevTool UI will appear in the browser that displays:
+   * - The current socket connection status (`connected`, `disconnected`, `reconnecting`)
+   * - A list of currently subscribed channels
+   * - A log panel showing socket events and debugging messages
+   *
+   * This is useful for development and debugging purposes.
+   * In production environments, it's recommended to leave this disabled.
+   *
+   * @default false
+   */
+  devtool?: boolean;
 };

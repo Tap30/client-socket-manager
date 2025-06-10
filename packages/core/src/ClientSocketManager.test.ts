@@ -14,6 +14,7 @@ import {
   expect,
   it,
 } from "vitest";
+import * as devtool from "./devtool/devtool.ts";
 import { ClientSocketManager } from "./index.ts";
 
 describe("ClientSocketManager: unit tests", () => {
@@ -283,6 +284,93 @@ describe("ClientSocketManager: unit tests", () => {
     socketServer.emit("test/init");
 
     await initMessageResolver.promise;
+
+    socketManager.dispose();
+
+    await diposeResolver.promise;
+
+    expect(socketManager.connected).toBe(false);
+    expect(socketManager.disposed).toBe(true);
+  });
+
+  it("should show devtool when the `devtool` option is true", () => {
+    socketManager = new ClientSocketManager(socketServerUri, {});
+    expect(devtool.getDevtoolElement()).toBeNull();
+    socketManager.dispose();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: true,
+    });
+    expect(devtool.getDevtoolElement()).not.toBeNull();
+  });
+
+  it("should update devtool ui when socket was updated", async () => {
+    const connectResolver = createPromiseResolvers();
+    const initResolver = createPromiseResolvers();
+    const initMessageResolver = createPromiseResolvers();
+    const diposeResolver = createPromiseResolvers();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: true,
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onInit() {
+          initResolver.resolve();
+          this.subscribe("test/init", () => {
+            initMessageResolver.resolve();
+          });
+        },
+        onDispose() {
+          diposeResolver.resolve();
+        },
+      },
+    });
+
+    // at first the devtool should be in the dom but because no we have lo logs or channels, these sections shouldn't exist.
+    expect(devtool.getDevtoolElement()).not.toBeNull();
+    expect(devtool.getDevtoolLogSectionElement()).toBeNull();
+    expect(devtool.getDevtoolChannelsElement()).toBeNull();
+    expect(devtool.getDevtoolInfoElement()).not.toBeNull();
+    expect(devtool.getDevtoolStatusElement()?.innerHTML).not.toEqual(
+      devtool.Status.CONNECTED,
+    );
+
+    await connectResolver.promise;
+
+    // now the log should be visible to the user
+    expect(devtool.getDevtoolLogSectionElement()).not.toBeNull();
+    expect(devtool.getDevtoolStatusElement()?.innerHTML).toEqual(
+      devtool.Status.CONNECTED,
+    );
+    await initResolver.promise;
+
+    // subscribing to a channel...
+    expect(devtool.getDevtoolLogSectionElement()!.innerHTML).not.toContain(
+      devtool.LogType.SUBSCRIBED,
+    );
+    expect(devtool.getDevtoolChannelsElement()).toBeNull();
+
+    socketManager.subscribe("test/init", () => {});
+
+    expect(devtool.getDevtoolChannelsElement()).not.toBeNull();
+    expect(devtool.getDevtoolLogSectionElement()!.innerHTML).toContain(
+      devtool.LogType.SUBSCRIBED,
+    );
+    expect(devtool.getDevtoolChannelsElement()!.innerHTML).contain("test/init");
+
+    // unsubscribing a channel...
+    expect(devtool.getDevtoolLogSectionElement()!.innerHTML).not.toContain(
+      devtool.LogType.UNSUBSCRIBED,
+    );
+
+    socketManager.unsubscribe("test/init", () => {});
+
+    expect(devtool.getDevtoolLogSectionElement()!.innerHTML).toContain(
+      devtool.LogType.UNSUBSCRIBED,
+    );
+    expect(devtool.getDevtoolChannelsElement()).toBeNull();
 
     socketManager.dispose();
 

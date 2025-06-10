@@ -11,7 +11,7 @@ const config = defineConfig({
         extends: true,
         test: {
           name: "core",
-          environment: "node",
+          environment: "jsdom",
           include: [
             "packages/core/**/__tests__/**/*.[jt]s?(x)",
             "packages/core/**/?(*.)+(spec|test).[jt]s?(x)",
