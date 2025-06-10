@@ -115,7 +115,7 @@ export type ClientSocketManagerListenerOptions = {
 };
 
 export type ClientSocketManagerOptions = OverrideMembers<
-  ManagerOptions & SocketOptions,
+  Partial<ManagerOptions> & SocketOptions,
   {
     /**
      * The time delay in milliseconds between reconnection attempts.
@@ -134,7 +134,7 @@ export type ClientSocketManagerOptions = OverrideMembers<
   /**
    * Handlers for various events.
    */
-  eventHandlers?: Partial<ClientSocketManagerListenerOptions>;
+  eventHandlers?: ClientSocketManagerListenerOptions;
   /**
    * Enables the in-browser DevTool panel for socket debugging.
    *

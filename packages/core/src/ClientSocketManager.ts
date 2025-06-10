@@ -22,7 +22,7 @@ class ClientSocketManager<
 
   private _inputListeners: ClientSocketManagerListenerOptions = {};
 
-  constructor(uri: string, options?: Partial<ClientSocketManagerOptions>) {
+  constructor(uri: string, options?: ClientSocketManagerOptions) {
     const {
       path = "/socket.io",
       reconnectionDelay = 500,
@@ -115,38 +115,32 @@ class ClientSocketManager<
       onSuccessfulReconnection,
     } = this._inputListeners;
 
-    if (onConnectionError) {
-      manager.on(ManagerReservedEvents.CONNECTION_ERROR, error => {
-        onConnectionError.call(this, error);
-        devtool.render(s => {
-          s.logs.enqueue({
-            type: devtool.LogType.CONNECTION_ERROR,
-
-            date: new Date(),
-            detail: error.message,
-          });
+    manager.on(ManagerReservedEvents.CONNECTION_ERROR, error => {
+      onConnectionError?.call(this, error);
+      devtool.render(s => {
+        s.logs.enqueue({
+          type: devtool.LogType.CONNECTION_ERROR,
+          date: new Date(),
+          detail: error.message,
         });
       });
-    }
+    });
 
     if (onServerPing) {
       manager.on(ManagerReservedEvents.SERVER_PING, onServerPing.bind(this));
     }
 
-    if (onReconnecting) {
-      manager.on(ManagerReservedEvents.RECONNECTING, attempt => {
-        onReconnecting.call(this, attempt);
-        devtool.render(s => {
-          s.status = devtool.Status.RECONNECTING;
-          s.logs.enqueue({
-            type: devtool.LogType.RECONNECTING,
-
-            date: new Date(),
-            detail: `Reconnecting... (${attempt} attempt(s))`,
-          });
+    manager.on(ManagerReservedEvents.RECONNECTING, attempt => {
+      onReconnecting?.call(this, attempt);
+      devtool.render(s => {
+        s.status = devtool.Status.RECONNECTING;
+        s.logs.enqueue({
+          type: devtool.LogType.RECONNECTING,
+          date: new Date(),
+          detail: `Reconnecting... (${attempt} attempt(s))`,
         });
       });
-    }
+    });
 
     manager.on(ManagerReservedEvents.RECONNECTING_ERROR, error => {
       onReconnectingError?.call(this, error);
