@@ -3,4 +3,3 @@
 ---
 
 Add devtool to the client socket manager.
-  

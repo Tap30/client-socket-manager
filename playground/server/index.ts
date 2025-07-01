@@ -20,6 +20,10 @@ io.on("connection", socket => {
   console.log("a socket connected", socket.id);
 
   socket.on("message", console.log);
+
+  setTimeout(() => {
+    socket.emit("testchannel");
+  }, 5000);
 });
 
 server.listen(3000, () => {

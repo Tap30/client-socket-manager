@@ -6,13 +6,17 @@
 
 <div align="center">
 
-A React utility that provides context for `ClientSocketManager`, ensuring seamless management of socket connections with `socket.io-client`.
+A React utility that provides context for `ClientSocketManager`, ensuring
+seamless management of socket connections with `socket.io-client`.
 
 </div>
 
 <hr />
 
-`ClientSocketManager` is a flexible and robust manager for handling socket connections using `socket.io-client`. It provides easy setup and management of socket connections with support for automatic reconnections, event handling, and visibility change management.
+`ClientSocketManager` is a flexible and robust manager for handling socket
+connections using `socket.io-client`. It provides easy setup and management of
+socket connections with support for automatic reconnections, event handling, and
+visibility change management.
 
 ## Installation
 
@@ -24,7 +28,8 @@ npm install @tapsioss/react-client-socket-manager socket.io-client
 
 ## Usage
 
-Here is an example of how to use `SocketClientProvider` and `useSocketClient` in your project:
+Here is an example of how to use `SocketClientProvider` and `useSocketClient` in
+your project:
 
 ```tsx
 import * as React from "react";
@@ -81,9 +86,7 @@ const App = () => {
 ### `SocketClientProvider` Component:
 
 ```ts
-const SocketClientProvider: (
-  props: SocketClientProviderProps,
-) => JSX.Element;
+const SocketClientProvider: (props: SocketClientProviderProps) => JSX.Element;
 ```
 
 Wraps your application to provide `ClientSocketManager` client.
@@ -92,12 +95,17 @@ Wraps your application to provide `ClientSocketManager` client.
 
 - `children`: The React tree to provide the socket client for.
 - `uri`: The URI of the socket server.
-- `shouldUseStub` (optional): When set to `true`, the provider uses a stubbed socket client instead of connecting to a real socket server. This is especially useful for **server-side rendering (SSR)** or **unit testing** scenarios.
+- `shouldUseStub` (optional): When set to `true`, the provider uses a stubbed
+  socket client instead of connecting to a real socket server. This is
+  especially useful for **server-side rendering (SSR)** or **unit testing**
+  scenarios.
 - `options`: (optional): Configuration options for the socket connection.
 
 ##### Options:
 
-We have extended [socket-io's options](https://socket.io/docs/v4/client-options/) to include additional options:
+We have extended
+[socket-io's options](https://socket.io/docs/v4/client-options/) to include
+additional options:
 
 - `eventHandlers`: Handlers for various socket events.
   - `onInit`: Fired upon instantiation.
@@ -108,12 +116,17 @@ We have extended [socket-io's options](https://socket.io/docs/v4/client-options/
   - `onConnectionError`: Fired upon a connection error.
   - `onReconnecting`: Fired upon an attempt to reconnect.
   - `onReconnectingError`: Fired upon a reconnection attempt error.
-  - `onReconnectionFailure`: Fired when couldn't reconnect within `reconnectionAttempts`.
+  - `onReconnectionFailure`: Fired when couldn't reconnect within
+    `reconnectionAttempts`.
   - `onSuccessfulReconnection`: Fired upon a successful reconnection.
-  - `onAnySubscribedMessageReceived`: Fired when any message is received from a subscribed channel.
-  - `onVisiblePage`: Fired when the page's `visibilityState` changes to `visible`.
+  - `onAnySubscribedMessageReceived`: Fired when any message is received from a
+    subscribed channel.
+  - `onVisiblePage`: Fired when the page's `visibilityState` changes to
+    `visible`.
   - `onHiddenPage`: Fired when the page's `visibilityState` changes to `hidden`.
-- `devtool`: Enables the in-browser DevTool panel for socket debugging. This is useful for development and debugging purposes. In production environments, it's recommended to leave this disabled.
+- `devtool`: Enables the in-browser DevTool panel for socket debugging. This is
+  useful for development and debugging purposes. In production environments,
+  it's recommended to leave this disabled.
 
 ### `useSocketClient` Hook:
 
@@ -138,4 +151,5 @@ A custom hook to access the `ClientSocketManager` client.
 
 ## License
 
-This project is licensed under the terms of the [MIT license](https://github.com/Tap30/client-socket-manager/blob/main/packages/core/LICENSE).
+This project is licensed under the terms of the
+[MIT license](https://github.com/Tap30/client-socket-manager/blob/main/packages/core/LICENSE).

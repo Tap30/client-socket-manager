@@ -6,13 +6,17 @@
 
 <div align="center">
 
-A wrapper for `socket.io-client` that handles best practices and edge cases in a more abstracted and opinionated manner.
+A wrapper for `socket.io-client` that handles best practices and edge cases in a
+more abstracted and opinionated manner.
 
 </div>
 
 <hr />
 
-`ClientSocketManager` is a flexible and robust manager for handling socket connections using `socket.io-client`. It provides easy setup and management of socket connections with support for automatic reconnections, event handling, and visibility change management.
+`ClientSocketManager` is a flexible and robust manager for handling socket
+connections using `socket.io-client`. It provides easy setup and management of
+socket connections with support for automatic reconnections, event handling, and
+visibility change management.
 
 ## Installation
 
@@ -27,18 +31,18 @@ npm install @tapsioss/client-socket-manager socket.io-client
 Here is an example of how to use `ClientSocketManager` in your project:
 
 ```ts
-import { ClientSocketManager } from '@tapsioss/client-socket-manager';
+import { ClientSocketManager } from "@tapsioss/client-socket-manager";
 
-const socketManager = new ClientSocketManager('http://localhost:3000', {
+const socketManager = new ClientSocketManager("http://localhost:3000", {
   eventHandlers: {
     onSocketConnection() {
-      console.log('Socket connected');
+      console.log("Socket connected");
     },
     onSocketDisconnection(reason) {
-      console.log('Socket disconnected:', reason);
+      console.log("Socket disconnected:", reason);
     },
     onSuccessfulReconnection(attempt) {
-      console.log('Socket reconnected after', attempt, 'attempt(s)');
+      console.log("Socket reconnected after", attempt, "attempt(s)");
     },
     onAnySubscribedMessageReceived(channel, message) {
       console.log(`Message received on ${channel}:`, message);
@@ -47,11 +51,11 @@ const socketManager = new ClientSocketManager('http://localhost:3000', {
 });
 
 // Emit an event
-socketManager.emit('message', 'Hello, world!');
+socketManager.emit("message", "Hello, world!");
 
 // Subscribe to a channel
-socketManager.subscribe('message', (msg) => {
-  console.log('Message from server:', msg);
+socketManager.subscribe("message", msg => {
+  console.log("Message from server:", msg);
 });
 ```
 
@@ -70,7 +74,9 @@ constructor(uri: string, options?: ClientSocketManagerOptions)
 
 ##### Options:
 
-We have extended [socket-io's options](https://socket.io/docs/v4/client-options/) to include additional options:
+We have extended
+[socket-io's options](https://socket.io/docs/v4/client-options/) to include
+additional options:
 
 - `eventHandlers`: Handlers for various socket events.
   - `onInit`: Fired upon instantiation.
@@ -81,13 +87,17 @@ We have extended [socket-io's options](https://socket.io/docs/v4/client-options/
   - `onConnectionError`: Fired upon a connection error.
   - `onReconnecting`: Fired upon an attempt to reconnect.
   - `onReconnectingError`: Fired upon a reconnection attempt error.
-  - `onReconnectionFailure`: Fired when couldn't reconnect within `reconnectionAttempts`.
+  - `onReconnectionFailure`: Fired when couldn't reconnect within
+    `reconnectionAttempts`.
   - `onSuccessfulReconnection`: Fired upon a successful reconnection.
-  - `onAnySubscribedMessageReceived`: Fired when any message is received from a subscribed channel.
-  - `onVisiblePage`: Fired when the page's `visibilityState` changes to `visible`.
+  - `onAnySubscribedMessageReceived`: Fired when any message is received from a
+    subscribed channel.
+  - `onVisiblePage`: Fired when the page's `visibilityState` changes to
+    `visible`.
   - `onHiddenPage`: Fired when the page's `visibilityState` changes to `hidden`.
-- `devtool`: Enables the in-browser DevTool panel for socket debugging. This is useful for development and debugging purposes. In production environments, it's recommended to leave this disabled.
-  
+- `devtool`: Enables the in-browser DevTool panel for socket debugging. This is
+  useful for development and debugging purposes. In production environments,
+  it's recommended to leave this disabled.
 
 ### Properties:
 
@@ -109,7 +119,8 @@ Whether the connection state was recovered after a temporary disconnection.
 
 #### `autoReconnectable: boolean`
 
-Whether the Socket will try to reconnect when its Manager connects or reconnects.
+Whether the Socket will try to reconnect when its Manager connects or
+reconnects.
 
 ### Methods:
 
@@ -142,16 +153,19 @@ subscribe<Ev extends EventNames<ListenEvents>>(
 ): void;
 ```
 
-Subscribes to a specified channel with a callback function. Ensures that only one listener exists per channel.
+Subscribes to a specified channel with a callback function. Ensures that only
+one listener exists per channel.
 
 ##### Parameters:
 
 - `channel`: The name of the channel to subscribe to.
-- `cb`: The callback function to invoke when a message is received on the channel.
+- `cb`: The callback function to invoke when a message is received on the
+  channel.
 - `options`: Optional parameters.
-  - `onSubscriptionComplete`: The callback function to invoke when the subscription is complete.
+  - `onSubscriptionComplete`: The callback function to invoke when the
+    subscription is complete.
   - `signal`: The `AbortSignal` to unsubscribe the listener upon abortion.
-  
+
 #### `unsubscribe`:
 
 ```ts
@@ -161,7 +175,8 @@ unsubscribe<Ev extends EventNames<ListenEvents>>(
 ): void;
 ```
 
-Removes the listener for the specified channel. If no callback is provided, it removes all listeners for that channel.
+Removes the listener for the specified channel. If no callback is provided, it
+removes all listeners for that channel.
 
 ##### Parameters:
 
@@ -182,7 +197,9 @@ Manually connects/reconnects the socket.
 disconnect(): void;
 ```
 
-Manually disconnects the socket. In that case, the socket will not try to reconnect. If this is the last active Socket instance of the Manager, the low-level connection will be closed.
+Manually disconnects the socket. In that case, the socket will not try to
+reconnect. If this is the last active Socket instance of the Manager, the
+low-level connection will be closed.
 
 #### `dispose`:
 
@@ -190,15 +207,16 @@ Manually disconnects the socket. In that case, the socket will not try to reconn
 dispose(): void;
 ```
 
-Disposes of the socket, manager, and engine, ensuring all connections are closed and cleaned up.
-
+Disposes of the socket, manager, and engine, ensuring all connections are closed
+and cleaned up.
 
 ## `ClientSocketManagerStub`
 
-The package also exports a stubbed version of the socket manager for use in **testing** or **server-side rendering (SSR)** environments:
+The package also exports a stubbed version of the socket manager for use in
+**testing** or **server-side rendering (SSR)** environments:
 
 ```ts
-import { ClientSocketManagerStub } from '@tapsioss/client-socket-manager';
+import { ClientSocketManagerStub } from "@tapsioss/client-socket-manager";
 
 const stub = new ClientSocketManagerStub("mock://url", {
   eventHandlers: {
@@ -217,15 +235,17 @@ stub.dispose(); // Marks the client as disposed
 
 - Prevents actual network communication in unit tests and SSR.
 - Mimics the API surface of the real `ClientSocketManager`.
-- Triggers configured event handlers like `onSocketConnection` and `onSocketDisconnection`.
+- Triggers configured event handlers like `onSocketConnection` and
+  `onSocketDisconnection`.
 
 ### Stub Behavior Summary
 
 - Methods like `emit`, `subscribe`, and `unsubscribe` are no-ops.
 - `connect()` and `disconnect()` simulate connection lifecycle events.
-- The `connected`, `disposed`, `id`, and other properties behave consistently with a mock socket.
-
+- The `connected`, `disposed`, `id`, and other properties behave consistently
+  with a mock socket.
 
 ## License
 
-This project is licensed under the terms of the [MIT license](https://github.com/Tap30/client-socket-manager/blob/main/packages/core/LICENSE).
+This project is licensed under the terms of the
+[MIT license](https://github.com/Tap30/client-socket-manager/blob/main/packages/core/LICENSE).

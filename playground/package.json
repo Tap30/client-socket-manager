@@ -13,7 +13,6 @@
     "vite-tsconfig-paths": "^5.1.2"
   },
   "dependencies": {
-    "@tapsioss/client-socket-manager": "workspace:*",
-    "@tapsioss/react-client-socket-manager": "workspace:*"
+    "@tapsioss/client-socket-manager": "workspace:*"
   }
 }

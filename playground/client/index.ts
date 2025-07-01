@@ -4,6 +4,7 @@
 import { ClientSocketManager } from "@tapsioss/client-socket-manager";
 
 const socketManager = new ClientSocketManager("http://localhost:3000", {
+  devtool: true,
   eventHandlers: {
     onReconnectingError(err) {
       console.log("reconnecting error", err);
@@ -42,7 +43,6 @@ const socketManager = new ClientSocketManager("http://localhost:3000", {
       console.log("socket successfully reconnected", attempt);
     },
   },
-  devtool: true,
 });
 
 const createButton = (text: string) => {
@@ -102,7 +102,37 @@ const createSendMessageBtn = () => {
   return button;
 };
 
+const createSubBtn = () => {
+  const button = createButton("sub");
+
+  const subcb = () => {
+    console.log("from testchannel");
+  };
+
+  button.addEventListener("click", () => {
+    socketManager.subscribe("testchannel", subcb);
+  });
+
+  document.body.append(button);
+
+  return button;
+};
+
+const createUnsubBtn = () => {
+  const button = createButton("unsub");
+
+  button.addEventListener("click", () => {
+    socketManager.unsubscribe("testchannel");
+  });
+
+  document.body.append(button);
+
+  return button;
+};
+
 createDisconnectBtn();
 createReconnectBtn();
 createDisposeBtn();
 createSendMessageBtn();
+createSubBtn();
+createUnsubBtn();
