@@ -11,7 +11,7 @@ seamless management of socket connections with `socket.io-client`.
 
 </div>
 
-<hr />
+---
 
 `ClientSocketManager` is a flexible and robust manager for handling socket
 connections using `socket.io-client`. It provides easy setup and management of
@@ -83,7 +83,7 @@ const App = () => {
 
 ## API Reference
 
-### `SocketClientProvider` Component:
+### `SocketClientProvider` Component
 
 ```ts
 const SocketClientProvider: (props: SocketClientProviderProps) => JSX.Element;
@@ -91,7 +91,7 @@ const SocketClientProvider: (props: SocketClientProviderProps) => JSX.Element;
 
 Wraps your application to provide `ClientSocketManager` client.
 
-#### Parameters:
+#### Parameters
 
 - `children`: The React tree to provide the socket client for.
 - `uri`: The URI of the socket server.
@@ -101,7 +101,7 @@ Wraps your application to provide `ClientSocketManager` client.
   scenarios.
 - `options`: (optional): Configuration options for the socket connection.
 
-##### Options:
+##### Options
 
 We have extended
 [socket-io's options](https://socket.io/docs/v4/client-options/) to include
@@ -128,7 +128,7 @@ additional options:
   useful for development and debugging purposes. In production environments,
   it's recommended to leave this disabled.
 
-### `useSocketClient` Hook:
+### `useSocketClient` Hook
 
 ```ts
 type ConnectionStatusValues = "connected" | "disconnected" | "reconnecting";

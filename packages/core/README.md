@@ -11,7 +11,7 @@ more abstracted and opinionated manner.
 
 </div>
 
-<hr />
+---
 
 `ClientSocketManager` is a flexible and robust manager for handling socket
 connections using `socket.io-client`. It provides easy setup and management of
@@ -67,12 +67,12 @@ socketManager.subscribe("message", msg => {
 constructor(uri: string, options?: ClientSocketManagerOptions)
 ```
 
-#### Parameters:
+#### Parameters
 
 - `uri`: The URI of the socket server.
 - `options`: (optional): Configuration options for the socket connection.
 
-##### Options:
+##### Options
 
 We have extended
 [socket-io's options](https://socket.io/docs/v4/client-options/) to include
@@ -99,7 +99,7 @@ additional options:
   useful for development and debugging purposes. In production environments,
   it's recommended to leave this disabled.
 
-### Properties:
+### Properties
 
 #### `id: string | null`
 
@@ -122,9 +122,9 @@ Whether the connection state was recovered after a temporary disconnection.
 Whether the Socket will try to reconnect when its Manager connects or
 reconnects.
 
-### Methods:
+### Methods
 
-#### `emit`:
+#### `emit`
 
 ```ts
 emit<Ev extends EventNames<EmitEvents>>(
@@ -135,12 +135,12 @@ emit<Ev extends EventNames<EmitEvents>>(
 
 Emits an event to the socket identified by the channel name.
 
-##### Parameters:
+##### Parameters
 
 - `channel`: The name of the channel to emit the event to.
 - `args`: The arguments to pass with the event.
 
-#### `subscribe`:
+#### `subscribe`
 
 ```ts
 subscribe<Ev extends EventNames<ListenEvents>>(
@@ -156,7 +156,7 @@ subscribe<Ev extends EventNames<ListenEvents>>(
 Subscribes to a specified channel with a callback function. Ensures that only
 one listener exists per channel.
 
-##### Parameters:
+##### Parameters
 
 - `channel`: The name of the channel to subscribe to.
 - `cb`: The callback function to invoke when a message is received on the
@@ -166,7 +166,7 @@ one listener exists per channel.
     subscription is complete.
   - `signal`: The `AbortSignal` to unsubscribe the listener upon abortion.
 
-#### `unsubscribe`:
+#### `unsubscribe`
 
 ```ts
 unsubscribe<Ev extends EventNames<ListenEvents>>(
@@ -178,12 +178,12 @@ unsubscribe<Ev extends EventNames<ListenEvents>>(
 Removes the listener for the specified channel. If no callback is provided, it
 removes all listeners for that channel.
 
-##### Parameters:
+##### Parameters
 
 - `channel`: The name of the channel whose listener should be deleted.
 - `cb` (optional): The subscriber callback function to remove.
 
-#### `connect`:
+#### `connect`
 
 ```ts
 connect(): void;
@@ -191,7 +191,7 @@ connect(): void;
 
 Manually connects/reconnects the socket.
 
-#### `disconnect`:
+#### `disconnect`
 
 ```ts
 disconnect(): void;
@@ -201,7 +201,7 @@ Manually disconnects the socket. In that case, the socket will not try to
 reconnect. If this is the last active Socket instance of the Manager, the
 low-level connection will be closed.
 
-#### `dispose`:
+#### `dispose`
 
 ```ts
 dispose(): void;
@@ -209,6 +209,22 @@ dispose(): void;
 
 Disposes of the socket, manager, and engine, ensuring all connections are closed
 and cleaned up.
+
+#### `showDevtool`
+
+```ts
+showDevtool(): void;
+```
+
+Show devtool in the browser programmatically.
+
+#### `hideDevtool`
+
+```ts
+hideDevtool(): void;
+```
+
+Hide devtool in the browser programmatically.
 
 ## `ClientSocketManagerStub`
 

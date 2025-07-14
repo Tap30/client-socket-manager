@@ -447,7 +447,7 @@ class ClientSocketManager<
   }
 
   /**
-   * Show devtool in the browser programmatically.
+   * Hide devtool in the browser programmatically.
    */
   public hideDevtool(): void {
     devtool.dispose();
