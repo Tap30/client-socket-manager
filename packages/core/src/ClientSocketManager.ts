@@ -50,7 +50,7 @@ class ClientSocketManager<
       this._inputListeners.onInit?.call(this);
 
       if (devtoolOpt) {
-        devtool.init();
+        this.showDevtool();
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -435,6 +435,21 @@ class ClientSocketManager<
     this._inputListeners = {};
     this._disposed = true;
 
+    devtool.dispose();
+  }
+
+  /**
+   * Show devtool in the browser programmatically.
+   */
+  public showDevtool(): void {
+    devtool.init();
+    devtool.render();
+  }
+
+  /**
+   * Show devtool in the browser programmatically.
+   */
+  public hideDevtool(): void {
     devtool.dispose();
   }
 }

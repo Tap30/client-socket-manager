@@ -328,9 +328,8 @@ describe("ClientSocketManager: unit tests", () => {
       },
     });
 
-    // at first the devtool should be in the dom but because no we have lo logs or channels, these sections shouldn't exist.
+    // at first the devtool should be in the dom but because no we have no logs or channels, these sections shouldn't exist.
     expect(devtool.getDevtoolElement()).not.toBeNull();
-    expect(devtool.getDevtoolLogSectionElement()).toBeNull();
     expect(devtool.getDevtoolChannelsElement()).toBeNull();
     expect(devtool.getDevtoolInfoElement()).not.toBeNull();
     expect(devtool.getDevtoolStatusElement()?.innerHTML).not.toEqual(
@@ -371,6 +370,21 @@ describe("ClientSocketManager: unit tests", () => {
       devtool.LogType.UNSUBSCRIBED,
     );
     expect(devtool.getDevtoolChannelsElement()).toBeNull();
+
+    // hiding devtool hide the devtool from the browser...
+    socketManager.hideDevtool();
+    expect(devtool.getDevtoolElement()).toBeNull();
+    // ... but the devtool state should remain the same
+    expect(socketManager.connected).toBe(true);
+    expect(socketManager.disposed).toBe(false);
+
+    // the devtool can be visible again
+    socketManager.showDevtool();
+    expect(devtool.getDevtoolElement()).not.toBeNull();
+    expect(devtool.getDevtoolStatusElement()?.innerHTML).toEqual(
+      devtool.Status.CONNECTED,
+    );
+    expect(devtool.getDevtoolLogSectionElement()!.children).toHaveLength(3);
 
     socketManager.dispose();
 

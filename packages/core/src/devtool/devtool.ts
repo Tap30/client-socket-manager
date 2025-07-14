@@ -304,6 +304,7 @@ export const dispose = () => {
   getDevtoolWrapperElement()?.remove();
 
   active = false;
+  expanded = false;
 };
 
 const updateUi = () => {
@@ -330,10 +331,10 @@ const toggle = () => {
   );
 };
 
-export const render = (cb: (s: typeof devtool) => void) => {
+export const render = (cb?: (s: typeof devtool) => void) => {
   if (!active) return;
 
-  cb(devtool);
+  cb?.(devtool);
   updateUi();
 };
 
