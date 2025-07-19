@@ -1,5 +1,11 @@
 # @tapsioss/react-client-socket-manager
 
+## 0.6.0
+### Patch Changes
+
+- Updated dependencies [[`bce3ae7`](https://github.com/Tap30/client-socket-manager/commit/bce3ae7e94adc946a7db19026294c91be31c6eb1)]:
+  - @tapsioss/client-socket-manager@0.6.0
+
 ## 0.5.0
 ### Patch Changes
 
