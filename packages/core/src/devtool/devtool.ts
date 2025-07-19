@@ -65,6 +65,9 @@ export const renderChipGroup = (items: string[]) => {
     "border-radius": "999px",
     padding: "0 0.5rem",
     "list-style-type": "none",
+    overflow: "hidden",
+    "white-space": "nowrap",
+    "text-overflow": "ellipsis",
   });
 
   const chipGroupStyle = generateInlineStyle({
@@ -73,6 +76,9 @@ export const renderChipGroup = (items: string[]) => {
     gap: "0.5rem",
     padding: "0",
     "flex-wrap": "wrap",
+    "overflow-x": "hidden",
+    "overflow-y": "auto",
+    "max-height": "6rem",
   });
 
   return `<ul id="${DEVTOOL_CHANNELS_ID}" style="${chipGroupStyle}">${items.map(item => `<li style="${chipStyle}">${item}</li>`).join("")}</ul>`;
@@ -212,7 +218,7 @@ export const renderDevtoolInfo = () => {
       transform: "scale(0)",
       "transform-origin": "0 0",
       transition: "opacity 0.2s, transform 0.2s",
-      width: "12rem",
+      width: "14rem",
     }),
   });
 
@@ -275,6 +281,8 @@ const init = () => {
   const devtoolWrapper = document.createElement("div");
 
   devtoolWrapper.style.position = "fixed";
+  devtoolWrapper.style.top = "8px";
+  devtoolWrapper.style.left = "8px";
   devtoolWrapper.id = DEVTOOL_WRAPPER_ID;
   devtoolWrapper.innerHTML = renderDevtool();
 
