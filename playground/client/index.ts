@@ -130,9 +130,35 @@ const createUnsubBtn = () => {
   return button;
 };
 
+const createShowDevtoolBtn = () => {
+  const button = createButton("show devtool");
+
+  button.addEventListener("click", () => {
+    socketManager.showDevtool();
+  });
+
+  document.body.append(button);
+
+  return button;
+};
+
+const createHideDevtoolBtn = () => {
+  const button = createButton("hide devtool");
+
+  button.addEventListener("click", () => {
+    socketManager.hideDevtool();
+  });
+
+  document.body.append(button);
+
+  return button;
+};
+
 createDisconnectBtn();
 createReconnectBtn();
 createDisposeBtn();
 createSendMessageBtn();
 createSubBtn();
 createUnsubBtn();
+createShowDevtoolBtn();
+createHideDevtoolBtn();

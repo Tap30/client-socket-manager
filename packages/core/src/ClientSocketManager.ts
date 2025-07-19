@@ -50,7 +50,7 @@ class ClientSocketManager<
       this._inputListeners.onInit?.call(this);
 
       if (devtoolOpt) {
-        devtool.init();
+        this.showDevtool();
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -74,8 +74,10 @@ class ClientSocketManager<
     this._socket.on(SocketReservedEvents.CONNECTION, () => {
       this._inputListeners.onSocketConnection?.call(this);
 
-      devtool.render(s => {
-        s.status = devtool.Status.CONNECTED;
+      devtool.render({
+        action: s => {
+          s.status = devtool.Status.CONNECTED;
+        },
       });
     });
 
@@ -89,8 +91,10 @@ class ClientSocketManager<
     this._socket.on(SocketReservedEvents.DISCONNECTION, (reason, details) => {
       this._inputListeners.onSocketDisconnection?.call(this, reason, details);
 
-      devtool.render(s => {
-        s.status = devtool.Status.DISCONNECTED;
+      devtool.render({
+        action: s => {
+          s.status = devtool.Status.DISCONNECTED;
+        },
       });
 
       if (!this.autoReconnectable) {
@@ -117,12 +121,14 @@ class ClientSocketManager<
 
     manager.on(ManagerReservedEvents.CONNECTION_ERROR, error => {
       onConnectionError?.call(this, error);
-      devtool.render(s => {
-        s.logs.enqueue({
-          type: devtool.LogType.CONNECTION_ERROR,
-          date: new Date(),
-          detail: error.message,
-        });
+      devtool.render({
+        action: s => {
+          s.logs.enqueue({
+            type: devtool.LogType.CONNECTION_ERROR,
+            date: new Date(),
+            detail: error.message,
+          });
+        },
       });
     });
 
@@ -132,46 +138,54 @@ class ClientSocketManager<
 
     manager.on(ManagerReservedEvents.RECONNECTING, attempt => {
       onReconnecting?.call(this, attempt);
-      devtool.render(s => {
-        s.status = devtool.Status.RECONNECTING;
-        s.logs.enqueue({
-          type: devtool.LogType.RECONNECTING,
-          date: new Date(),
-          detail: `Reconnecting... (${attempt} attempt(s))`,
-        });
+      devtool.render({
+        action: s => {
+          s.status = devtool.Status.RECONNECTING;
+          s.logs.enqueue({
+            type: devtool.LogType.RECONNECTING,
+            date: new Date(),
+            detail: `Reconnecting... (${attempt} attempt(s))`,
+          });
+        },
       });
     });
 
     manager.on(ManagerReservedEvents.RECONNECTING_ERROR, error => {
       onReconnectingError?.call(this, error);
-      devtool.render(s => {
-        s.logs.enqueue({
-          type: devtool.LogType.RECONNECTING_ERROR,
-          date: new Date(),
-          detail: error.message,
-        });
+      devtool.render({
+        action: s => {
+          s.logs.enqueue({
+            type: devtool.LogType.RECONNECTING_ERROR,
+            date: new Date(),
+            detail: error.message,
+          });
+        },
       });
     });
 
     manager.on(ManagerReservedEvents.RECONNECTION_FAILURE, () => {
       onReconnectionFailure?.call(this);
-      devtool.render(s => {
-        s.logs.enqueue({
-          type: devtool.LogType.RECONNECTION_FAILURE,
-          date: new Date(),
-          detail: `Failed to reconnect.`,
-        });
+      devtool.render({
+        action: s => {
+          s.logs.enqueue({
+            type: devtool.LogType.RECONNECTION_FAILURE,
+            date: new Date(),
+            detail: `Failed to reconnect.`,
+          });
+        },
       });
     });
 
     manager.on(ManagerReservedEvents.SUCCESSFUL_RECONNECTION, attempt => {
       onSuccessfulReconnection?.call(this, attempt);
-      devtool.render(s => {
-        s.logs.enqueue({
-          type: devtool.LogType.SUCCESSFUL_RECONNECTION,
-          date: new Date(),
-          detail: `Successfully connected after ${attempt} attempt(s)`,
-        });
+      devtool.render({
+        action: s => {
+          s.logs.enqueue({
+            type: devtool.LogType.SUCCESSFUL_RECONNECTION,
+            date: new Date(),
+            detail: `Successfully connected after ${attempt} attempt(s)`,
+          });
+        },
       });
     });
   }
@@ -336,13 +350,15 @@ class ClientSocketManager<
 
     onSubscriptionComplete?.call(this, channel);
 
-    devtool.render(s => {
-      s.channels.add(channel);
-      s.logs.enqueue({
-        type: devtool.LogType.SUBSCRIBED,
-        date: new Date(),
-        detail: `subscribed to \`${channel}\` channel`,
-      });
+    devtool.render({
+      action: s => {
+        s.channels.add(channel);
+        s.logs.enqueue({
+          type: devtool.LogType.SUBSCRIBED,
+          date: new Date(),
+          detail: `subscribed to \`${channel}\` channel`,
+        });
+      },
     });
   }
 
@@ -367,13 +383,15 @@ class ClientSocketManager<
     if (cb) this._socket.off(channel, cb);
     else this._socket.off(channel);
 
-    devtool.render(s => {
-      s.channels.delete(channel);
-      s.logs.enqueue({
-        type: devtool.LogType.UNSUBSCRIBED,
-        date: new Date(),
-        detail: `unsubscribed from \`${channel}\` channel`,
-      });
+    devtool.render({
+      action: s => {
+        s.channels.delete(channel);
+        s.logs.enqueue({
+          type: devtool.LogType.UNSUBSCRIBED,
+          date: new Date(),
+          detail: `unsubscribed from \`${channel}\` channel`,
+        });
+      },
     });
   }
 
@@ -385,12 +403,14 @@ class ClientSocketManager<
 
     this._socket?.connect();
 
-    devtool.render(s => {
-      s.logs.enqueue({
-        type: devtool.LogType.CONNECTED,
-        date: new Date(),
-        detail: `socket was conneced manually`,
-      });
+    devtool.render({
+      action: s => {
+        s.logs.enqueue({
+          type: devtool.LogType.CONNECTED,
+          date: new Date(),
+          detail: `socket was conneced manually`,
+        });
+      },
     });
   }
 
@@ -406,12 +426,14 @@ class ClientSocketManager<
 
     this._socket?.disconnect();
 
-    devtool.render(s => {
-      s.logs.enqueue({
-        type: devtool.LogType.DISCONNECTED,
-        date: new Date(),
-        detail: `socket was disconneced manually`,
-      });
+    devtool.render({
+      action: s => {
+        s.logs.enqueue({
+          type: devtool.LogType.DISCONNECTED,
+          date: new Date(),
+          detail: `socket was disconneced manually`,
+        });
+      },
     });
   }
 
@@ -435,6 +457,20 @@ class ClientSocketManager<
     this._inputListeners = {};
     this._disposed = true;
 
+    devtool.dispose();
+  }
+
+  /**
+   * Show devtool in the browser programmatically.
+   */
+  public showDevtool(): void {
+    devtool.render({ force: true });
+  }
+
+  /**
+   * Hide devtool in the browser programmatically.
+   */
+  public hideDevtool(): void {
     devtool.dispose();
   }
 }

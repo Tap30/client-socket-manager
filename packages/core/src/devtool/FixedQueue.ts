@@ -62,4 +62,11 @@ export class FixedQueue<T> {
   get length(): number {
     return this._queue.length;
   }
+
+  /**
+   * Clears the queue.
+   */
+  clear(): void {
+    this._queue = [];
+  }
 }

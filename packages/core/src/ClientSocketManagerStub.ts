@@ -137,6 +137,16 @@ class ClientSocketManagerStub {
     this._disposed = true;
     this._inputListeners = {};
   }
+
+  /**
+   * Show devtool in the browser programmatically.
+   */
+  public showDevtool(): void {}
+
+  /**
+   * Show devtool in the browser programmatically.
+   */
+  public hideDevtool(): void {}
 }
 
 export default ClientSocketManagerStub;
