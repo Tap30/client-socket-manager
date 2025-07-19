@@ -1,5 +1,12 @@
 # @tapsioss/client-socket-manager
 
+## 0.6.0
+### Minor Changes
+
+
+
+- [#19](https://github.com/Tap30/client-socket-manager/pull/19) [`bce3ae7`](https://github.com/Tap30/client-socket-manager/commit/bce3ae7e94adc946a7db19026294c91be31c6eb1) Thanks [@amir78729](https://github.com/amir78729)! - Add `hideDevtool` and `showDevtool` methods to the `ClientSocketManager`.
+
 ## 0.5.0
 ### Minor Changes
 
