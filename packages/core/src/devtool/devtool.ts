@@ -267,7 +267,7 @@ export const updateInfoSection = () => {
   return infoSection;
 };
 
-export const init = () => {
+const init = () => {
   if (active) return;
 
   active = true;
@@ -307,14 +307,6 @@ export const dispose = () => {
   expanded = false;
 };
 
-const updateUi = () => {
-  const devtoolElement = getDevtoolElement();
-
-  if (!devtoolElement) init();
-
-  updateInfoSection();
-};
-
 const toggle = () => {
   const socketIcon = getDevtoolSocketIconElement()!;
   const closeIcon = getDevtoolCloseIconElement()!;
@@ -331,11 +323,26 @@ const toggle = () => {
   );
 };
 
-export const render = (cb?: (s: typeof devtool) => void) => {
-  if (!active) return;
+type RenderOptions = {
+  action?: (s: typeof devtool) => void;
+  force?: boolean;
+};
 
-  cb?.(devtool);
-  updateUi();
+export const render = (options?: RenderOptions) => {
+  const { action, force = false } = options ?? {};
+
+  if (force) {
+    init();
+  } else {
+    if (!active) return;
+
+    const devtoolElement = getDevtoolElement();
+
+    if (!devtoolElement) init();
+  }
+
+  action?.(devtool);
+  updateInfoSection();
 };
 
 export { LogType, Status };
