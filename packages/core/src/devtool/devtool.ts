@@ -68,6 +68,7 @@ export const renderChipGroup = (items: string[]) => {
     overflow: "hidden",
     "white-space": "nowrap",
     "text-overflow": "ellipsis",
+    "overscroll-behavior-y": "contain",
   });
 
   const chipGroupStyle = generateInlineStyle({
@@ -165,6 +166,7 @@ export const renderLogs = () => {
     style: generateInlineStyle({
       "max-height": "20rem",
       overflow: "scroll",
+      "overscroll-behavior-y": "contain",
     }),
   });
 
@@ -290,9 +292,13 @@ const init = () => {
   devtoolWrapper.innerHTML = renderDevtool();
 
   document.body.appendChild(devtoolWrapper);
-  makeElementDraggable(devtoolWrapper);
 
-  getDevtoolIconElement()?.addEventListener("click", toggle);
+  const iconButton = getDevtoolIconElement();
+
+  if (iconButton) {
+    iconButton.addEventListener("click", toggle);
+    makeElementDraggable(iconButton, devtoolWrapper);
+  }
 
   [DEVTOOL_CLOSE_ICON_ID, DEVTOOL_SOCKET_ICON_ID].forEach(icon => {
     const buttonIcon = document.getElementById(icon);

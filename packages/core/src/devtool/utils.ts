@@ -51,9 +51,13 @@ export const generateAttributes = (
  * - The element must be absolutely or fixed-positioned, and should not be constrained by layout flow
  * - Internally sets `element.style.touchAction = 'none'` to disable browser-native touch gestures
  *
- * @param element - The HTMLElement to make draggable
+ * @param dragHandle - The drag handle.
+ * @param dragTarget - The HTMLElement that will move when dragging with the handler.
  */
-export const makeElementDraggable = (element: HTMLElement) => {
+export const makeElementDraggable = (
+  dragHandle: HTMLElement,
+  dragTarget: HTMLElement,
+) => {
   // Extract clientX from MouseEvent or TouchEvent
   const getClientX = (event: MouseEvent | TouchEvent) => {
     if (event instanceof MouseEvent) return event.clientX;
@@ -112,7 +116,7 @@ export const makeElementDraggable = (element: HTMLElement) => {
       x = initialX + deltaX;
       y = initialY + deltaY;
 
-      element.style.transform = `translate(${x}px, ${y}px)`;
+      dragTarget.style.transform = `translate(${x}px, ${y}px)`;
     }
   };
 
@@ -125,10 +129,10 @@ export const makeElementDraggable = (element: HTMLElement) => {
   };
 
   // Disable browser-native touch gestures (scroll, nav swipe)
-  element.style.touchAction = "none";
+  dragHandle.style.touchAction = "none";
 
-  element.addEventListener("touchstart", handleDragStart, false);
-  element.addEventListener("mousedown", handleDragStart, false);
+  dragHandle.addEventListener("touchstart", handleDragStart, false);
+  dragHandle.addEventListener("mousedown", handleDragStart, false);
 
   document.addEventListener("mousemove", handleDragging, false);
   document.addEventListener("touchmove", handleDragging, false);
