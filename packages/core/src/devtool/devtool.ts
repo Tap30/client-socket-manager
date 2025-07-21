@@ -283,6 +283,9 @@ const init = () => {
   devtoolWrapper.style.position = "fixed";
   devtoolWrapper.style.top = "8px";
   devtoolWrapper.style.left = "8px";
+  // initial z-index. can be override in render function.
+  devtoolWrapper.style.zIndex = "99999";
+
   devtoolWrapper.id = DEVTOOL_WRAPPER_ID;
   devtoolWrapper.innerHTML = renderDevtool();
 
@@ -334,10 +337,11 @@ const toggle = () => {
 type RenderOptions = {
   action?: (s: typeof devtool) => void;
   force?: boolean;
+  zIndex?: number;
 };
 
 export const render = (options?: RenderOptions) => {
-  const { action, force = false } = options ?? {};
+  const { action, force = false, zIndex } = options ?? {};
 
   if (force) {
     init();
@@ -347,6 +351,10 @@ export const render = (options?: RenderOptions) => {
     const devtoolElement = getDevtoolElement();
 
     if (!devtoolElement) init();
+  }
+
+  if (zIndex !== undefined) {
+    getDevtoolWrapperElement()!.style.zIndex = zIndex.toString();
   }
 
   action?.(devtool);
