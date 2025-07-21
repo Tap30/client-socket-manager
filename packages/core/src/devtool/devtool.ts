@@ -54,6 +54,7 @@ const devtool: DevtoolState = {
 
 let active = false;
 let expanded = false;
+let zIndex: number = NaN;
 
 export const renderDivider = () => {
   return `<hr color="#222222" />`;
@@ -282,11 +283,15 @@ const init = () => {
 
   const devtoolWrapper = document.createElement("div");
 
+  if (Number.isNaN(zIndex)) {
+    throw new Error("No z-index was set for the devtool.");
+  } else {
+    devtoolWrapper.style.zIndex = `${zIndex}`;
+  }
+
   devtoolWrapper.style.position = "fixed";
   devtoolWrapper.style.top = "8px";
   devtoolWrapper.style.left = "8px";
-  // initial z-index. can be override in render function.
-  devtoolWrapper.style.zIndex = "99999";
 
   devtoolWrapper.id = DEVTOOL_WRAPPER_ID;
   devtoolWrapper.innerHTML = renderDevtool();
@@ -317,6 +322,10 @@ const init = () => {
   });
 };
 
+export const setZIndex = (z: number) => {
+  zIndex = z;
+};
+
 export const dispose = () => {
   getDevtoolWrapperElement()?.remove();
 
@@ -343,11 +352,10 @@ const toggle = () => {
 type RenderOptions = {
   action?: (s: typeof devtool) => void;
   force?: boolean;
-  zIndex?: number;
 };
 
 export const render = (options?: RenderOptions) => {
-  const { action, force = false, zIndex } = options ?? {};
+  const { action, force = false } = options ?? {};
 
   if (force) {
     init();
@@ -357,10 +365,6 @@ export const render = (options?: RenderOptions) => {
     const devtoolElement = getDevtoolElement();
 
     if (!devtoolElement) init();
-  }
-
-  if (zIndex !== undefined) {
-    getDevtoolWrapperElement()!.style.zIndex = zIndex.toString();
   }
 
   action?.(devtool);

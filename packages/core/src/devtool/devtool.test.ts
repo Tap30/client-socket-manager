@@ -10,6 +10,7 @@ import * as devtool from "./devtool.ts";
 
 describe("Devtool", () => {
   beforeEach(() => {
+    devtool.setZIndex(99999);
     devtool.render({
       force: true,
       action: s => {

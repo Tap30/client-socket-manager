@@ -28,9 +28,12 @@ class ClientSocketManager<
       reconnectionDelay = 500,
       reconnectionDelayMax = 2000,
       eventHandlers,
-      devtool: devtoolOpt = false,
+      devtool: devtoolOpt,
       ...restOptions
     } = options ?? {};
+
+    const { enabled: devtoolEnabled = false, zIndex: devtoolZIndex = 999999 } =
+      devtoolOpt ?? {};
 
     try {
       this._socket = io(uri, {
@@ -49,7 +52,8 @@ class ClientSocketManager<
 
       this._inputListeners.onInit?.call(this);
 
-      if (devtoolOpt) {
+      if (devtoolEnabled) {
+        devtool.setZIndex(devtoolZIndex);
         this.showDevtool();
       }
     } catch (err) {
@@ -462,13 +466,9 @@ class ClientSocketManager<
 
   /**
    * Show devtool in the browser programmatically.
-   * @param {object} options - Options for showing the devtool.
-   * @param {number} options.zIndex - Z-index of the devtool, overrides the previous z-index of the devtool.
    */
-  public showDevtool(options?: { zIndex?: number }): void {
-    const { zIndex } = options ?? {};
-
-    devtool.render({ force: true, zIndex });
+  public showDevtool(): void {
+    devtool.render({ force: true });
   }
 
   /**

@@ -4,7 +4,9 @@
 import { ClientSocketManager } from "@tapsioss/client-socket-manager";
 
 const socketManager = new ClientSocketManager("http://localhost:3000", {
-  devtool: true,
+  devtool: {
+    enabled: true,
+  },
   eventHandlers: {
     onReconnectingError(err) {
       console.log("reconnecting error", err);
