@@ -1,5 +1,15 @@
 # @tapsioss/react-client-socket-manager
 
+## 0.6.0
+### Patch Changes
+
+
+
+- [#21](https://github.com/Tap30/client-socket-manager/pull/21) [`074befd`](https://github.com/Tap30/client-socket-manager/commit/074befd2d5f9af75394db7b0a853f91494019fb6) Thanks [@amir78729](https://github.com/amir78729)! - Improve devtool expecience in mobile devices.
+
+- Updated dependencies [[`e36974c`](https://github.com/Tap30/client-socket-manager/commit/e36974c7c76ec601ffea3ecf523a57cd37c76c08), [`074befd`](https://github.com/Tap30/client-socket-manager/commit/074befd2d5f9af75394db7b0a853f91494019fb6), [`bce3ae7`](https://github.com/Tap30/client-socket-manager/commit/bce3ae7e94adc946a7db19026294c91be31c6eb1)]:
+  - @tapsioss/client-socket-manager@0.6.0
+
 ## 0.5.0
 ### Patch Changes
 
