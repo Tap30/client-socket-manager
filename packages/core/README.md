@@ -213,10 +213,15 @@ and cleaned up.
 #### `showDevtool`
 
 ```ts
-showDevtool(): void;
+showDevtool(options): void;
 ```
 
 Show devtool in the browser programmatically.
+
+##### Parameters
+
+- `options`: Optional parameters.
+  - `zIndex`: Z-index of the devtool, overrides the previous z-index of the devtool.
 
 #### `hideDevtool`
 

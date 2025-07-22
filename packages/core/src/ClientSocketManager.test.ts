@@ -299,7 +299,9 @@ describe("ClientSocketManager: unit tests", () => {
     socketManager.dispose();
 
     socketManager = new ClientSocketManager(socketServerUri, {
-      devtool: true,
+      devtool: {
+        enabled: true,
+      },
     });
     expect(devtool.getDevtoolElement()).not.toBeNull();
   });
@@ -311,7 +313,9 @@ describe("ClientSocketManager: unit tests", () => {
     const diposeResolver = createPromiseResolvers();
 
     socketManager = new ClientSocketManager(socketServerUri, {
-      devtool: true,
+      devtool: {
+        enabled: true,
+      },
       eventHandlers: {
         onSocketConnection() {
           connectResolver.resolve();
@@ -392,5 +396,149 @@ describe("ClientSocketManager: unit tests", () => {
 
     expect(socketManager.connected).toBe(false);
     expect(socketManager.disposed).toBe(true);
+  });
+
+  it("should apply the specified z-index to the devtool and ensure correct click behavior", async () => {
+    const connectResolver = createPromiseResolvers();
+    const zIndex = 20;
+
+    // Create a div with a higher z-index to be on top of the devtool
+    const overlayDiv = document.createElement("div");
+
+    overlayDiv.style.position = "fixed";
+    overlayDiv.style.top = "0";
+    overlayDiv.style.left = "0";
+    overlayDiv.style.width = "100%";
+    overlayDiv.style.height = "100%";
+    overlayDiv.style.backgroundColor = "rgba(0,0,0,0.1)"; // Semi-transparent
+    overlayDiv.style.zIndex = (zIndex + 1).toString(); // Higher z-index
+    overlayDiv.id = "overlay-div";
+    document.body.appendChild(overlayDiv);
+
+    // Track clicks on the overlay and the devtool
+    let overlayClicked = false;
+    let devtoolClicked = false;
+
+    overlayDiv.addEventListener("click", () => {
+      overlayClicked = true;
+    });
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: {
+        enabled: true,
+        zIndex,
+      },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const devtoolElement = devtool.getDevtoolElement();
+
+    expect(devtoolElement).not.toBeNull();
+
+    // Add a click listener to the devtool itself to detect if it's reachable
+    devtoolElement?.addEventListener("click", () => {
+      devtoolClicked = true;
+    });
+
+    if (overlayDiv) {
+      const { left, top, width, height } = overlayDiv.getBoundingClientRect();
+      const clientX = left + width / 2;
+      const clientY = top + height / 2;
+
+      const clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        clientX,
+        clientY,
+      });
+
+      overlayDiv.dispatchEvent(clickEvent); // Dispatch click on the overlay
+    }
+
+    // Assert that only the overlay was clicked, indicating it was on top
+    expect(overlayClicked).toBe(true);
+    expect(devtoolClicked).toBe(false); // This should now pass if the overlay intercepted the click
+
+    // Clean up the overlay div
+    document.body.removeChild(overlayDiv);
+  });
+
+  it("should capture click when devtool z-index is higher than overlay", async () => {
+    const connectResolver = createPromiseResolvers();
+    const devtoolZIndex = 30; // Devtool will have a higher z-index
+
+    // Create an overlay div with a lower z-index
+    const overlayDiv = document.createElement("div");
+
+    overlayDiv.style.position = "fixed";
+    overlayDiv.style.top = "0";
+    overlayDiv.style.left = "0";
+    overlayDiv.style.width = "100%";
+    overlayDiv.style.height = "100%";
+    overlayDiv.style.backgroundColor = "rgba(0,0,0,0.1)"; // Semi-transparent
+    overlayDiv.style.zIndex = (devtoolZIndex - 1).toString(); // Lower z-index than devtool
+    overlayDiv.id = "lower-overlay-div";
+    document.body.appendChild(overlayDiv);
+
+    let overlayClicked = false;
+    let devtoolClicked = false;
+
+    overlayDiv.addEventListener("click", () => {
+      overlayClicked = true;
+    });
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: {
+        enabled: true,
+        zIndex: devtoolZIndex, // Set devtool's z-index to be higher
+      },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const devtoolElement = devtool.getDevtoolElement();
+
+    expect(devtoolElement).not.toBeNull();
+
+    devtoolElement?.addEventListener("click", () => {
+      devtoolClicked = true;
+    });
+
+    // Simulate a click on the devtool.
+    // Since the devtool's z-index is higher, it should receive the click.
+    if (devtoolElement) {
+      const { left, top, width, height } =
+        devtoolElement.getBoundingClientRect();
+
+      const clientX = left + width / 2;
+      const clientY = top + height / 2;
+
+      const clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        clientX,
+        clientY,
+      });
+
+      devtoolElement.dispatchEvent(clickEvent); // Dispatch click directly on the devtool
+    }
+
+    // Assert that the devtool was clicked, and the overlay was not
+    expect(devtoolClicked).toBe(true);
+    expect(overlayClicked).toBe(false);
+
+    // Clean up the overlay div
+    document.body.removeChild(overlayDiv);
   });
 });

@@ -28,9 +28,12 @@ class ClientSocketManager<
       reconnectionDelay = 500,
       reconnectionDelayMax = 2000,
       eventHandlers,
-      devtool: devtoolOpt = false,
+      devtool: devtoolOpt,
       ...restOptions
     } = options ?? {};
+
+    const { enabled: devtoolEnabled = false, zIndex: devtoolZIndex = 999999 } =
+      devtoolOpt ?? {};
 
     try {
       this._socket = io(uri, {
@@ -49,7 +52,8 @@ class ClientSocketManager<
 
       this._inputListeners.onInit?.call(this);
 
-      if (devtoolOpt) {
+      if (devtoolEnabled) {
+        devtool.setZIndex(devtoolZIndex);
         this.showDevtool();
       }
     } catch (err) {

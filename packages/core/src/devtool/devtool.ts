@@ -54,6 +54,7 @@ const devtool: DevtoolState = {
 
 let active = false;
 let expanded = false;
+let zIndex: number = NaN;
 
 export const renderDivider = () => {
   return `<hr color="#222222" />`;
@@ -282,9 +283,16 @@ const init = () => {
 
   const devtoolWrapper = document.createElement("div");
 
+  if (Number.isNaN(zIndex)) {
+    throw new Error("No z-index was set for the devtool.");
+  } else {
+    devtoolWrapper.style.zIndex = `${zIndex}`;
+  }
+
   devtoolWrapper.style.position = "fixed";
   devtoolWrapper.style.top = "8px";
   devtoolWrapper.style.left = "8px";
+
   devtoolWrapper.id = DEVTOOL_WRAPPER_ID;
   devtoolWrapper.innerHTML = renderDevtool();
 
@@ -312,6 +320,10 @@ const init = () => {
       }
     }
   });
+};
+
+export const setZIndex = (z: number) => {
+  zIndex = z;
 };
 
 export const dispose = () => {
