@@ -28,7 +28,7 @@ class ClientSocketManager<
       reconnectionDelay = 500,
       reconnectionDelayMax = 2000,
       eventHandlers,
-      devtool: devtoolOpt = false,
+      devtool: devtoolOpt,
       ...restOptions
     } = options ?? {};
 

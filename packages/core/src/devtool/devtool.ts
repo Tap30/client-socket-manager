@@ -56,7 +56,6 @@ const devtool: DevtoolState = {
 let active = false;
 let expanded = false;
 let zIndex: number = NaN;
-let zIndex: number = NaN;
 
 export const renderDivider = () => {
   return `<hr color="#222222" />`;
@@ -349,8 +348,6 @@ export const show = () => {
   devtoolWrapper.innerHTML = renderDevtool();
 
   document.body.appendChild(devtoolWrapper);
-
-  const iconButton = getDevtoolIconElement();
 
   const iconButton = getDevtoolIconElement();
 
