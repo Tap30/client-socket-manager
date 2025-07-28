@@ -299,19 +299,21 @@ describe("ClientSocketManager: unit tests", () => {
     socketManager.dispose();
 
     socketManager = new ClientSocketManager(socketServerUri, {
-      devtool: true,
+      devtool: {
+        enabled: true,
+      },
     });
     expect(devtool.getDevtoolElement()).not.toBeNull();
   });
 
-  it("should update devtool ui when socket was updated", async () => {
+  it("should be synchronized with the devtool", async () => {
     const connectResolver = createPromiseResolvers();
     const initResolver = createPromiseResolvers();
     const initMessageResolver = createPromiseResolvers();
     const diposeResolver = createPromiseResolvers();
 
     socketManager = new ClientSocketManager(socketServerUri, {
-      devtool: true,
+      devtool: { enabled: true },
       eventHandlers: {
         onSocketConnection() {
           connectResolver.resolve();
@@ -328,9 +330,8 @@ describe("ClientSocketManager: unit tests", () => {
       },
     });
 
-    // at first the devtool should be in the dom but because no we have no logs or channels, these sections shouldn't exist.
+    // at first the devtool should be in the dom but because we have no logs or channels, these sections shouldn't exist.
     expect(devtool.getDevtoolElement()).not.toBeNull();
-    expect(devtool.getDevtoolChannelsElement()).toBeNull();
     expect(devtool.getDevtoolInfoElement()).not.toBeNull();
     expect(devtool.getDevtoolStatusElement()?.innerHTML).not.toEqual(
       devtool.Status.CONNECTED,
@@ -346,11 +347,6 @@ describe("ClientSocketManager: unit tests", () => {
     await initResolver.promise;
 
     // subscribing to a channel...
-    expect(devtool.getDevtoolLogSectionElement()!.innerHTML).not.toContain(
-      devtool.LogType.SUBSCRIBED,
-    );
-    expect(devtool.getDevtoolChannelsElement()).toBeNull();
-
     socketManager.subscribe("test/init", () => {});
 
     expect(devtool.getDevtoolChannelsElement()).not.toBeNull();

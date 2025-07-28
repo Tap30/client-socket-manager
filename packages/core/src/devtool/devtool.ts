@@ -19,6 +19,7 @@ import {
 import { FixedQueue } from "./FixedQueue.ts";
 import { type DevtoolState, type Log } from "./types.ts";
 import {
+  formatDate,
   generateAttributes,
   generateInlineStyle,
   makeElementDraggable,
@@ -54,6 +55,7 @@ const devtool: DevtoolState = {
 
 let active = false;
 let expanded = false;
+let zIndex: number = NaN;
 
 export const renderDivider = () => {
   return `<hr color="#222222" />`;
@@ -150,7 +152,7 @@ export const renderLog = (log: Log) => {
 
   return `
   <div class="${DEVTOOL_LOGS_SECTION_ID}-item">
-    <p style="${timeStyle}">${log.date.toISOString()}</p>
+    <p style="${timeStyle}">${formatDate(log.date)}</p>
     <p style="${titleStyle}">${log.type}</p>
     <p style="${detailStyle}">${log.detail}</p>
   </div>
@@ -273,46 +275,24 @@ export const updateInfoSection = () => {
   return infoSection;
 };
 
-const init = () => {
-  if (active) return;
-
-  active = true;
-
-  const devtoolWrapper = document.createElement("div");
-
-  devtoolWrapper.style.position = "fixed";
-  devtoolWrapper.style.top = "8px";
-  devtoolWrapper.style.left = "8px";
-  devtoolWrapper.id = DEVTOOL_WRAPPER_ID;
-  devtoolWrapper.innerHTML = renderDevtool();
-
-  document.body.appendChild(devtoolWrapper);
-  makeElementDraggable(devtoolWrapper);
-
-  getDevtoolIconElement()?.addEventListener("click", toggle);
-
-  [DEVTOOL_CLOSE_ICON_ID, DEVTOOL_SOCKET_ICON_ID].forEach(icon => {
-    const buttonIcon = document.getElementById(icon);
-
-    if (buttonIcon) {
-      buttonIcon.style.position = "absolute";
-      buttonIcon.style.top = "50%";
-      buttonIcon.style.left = "50%";
-      buttonIcon.style.transform = "translate(-50%, -50%)";
-      buttonIcon.style.transition = "opacity 0.2s";
-
-      if (icon === DEVTOOL_CLOSE_ICON_ID) {
-        buttonIcon.style.opacity = "0";
-      }
-    }
-  });
+export const setZIndex = (z: number) => {
+  zIndex = z;
 };
 
-export const dispose = () => {
+export const hide = () => {
   getDevtoolWrapperElement()?.remove();
 
   active = false;
   expanded = false;
+};
+
+export const dispose = () => {
+  update(s => {
+    s.channels.clear();
+    s.logs.clear();
+    s.status = Status.UNKNOWN;
+  });
+  hide();
 };
 
 const toggle = () => {
@@ -331,25 +311,59 @@ const toggle = () => {
   );
 };
 
-type RenderOptions = {
-  action?: (s: typeof devtool) => void;
-  force?: boolean;
+export const update = (cb: (s: typeof devtool) => void) => {
+  cb?.(devtool);
+
+  if (active) {
+    updateInfoSection();
+  }
 };
 
-export const render = (options?: RenderOptions) => {
-  const { action, force = false } = options ?? {};
+export const show = () => {
+  if (active) return;
 
-  if (force) {
-    init();
+  active = true;
+
+  const devtoolWrapper = document.createElement("div");
+
+  if (Number.isNaN(zIndex)) {
+    throw new Error("No z-index was set for the devtool.");
   } else {
-    if (!active) return;
-
-    const devtoolElement = getDevtoolElement();
-
-    if (!devtoolElement) init();
+    devtoolWrapper.style.zIndex = `${zIndex}`;
   }
 
-  action?.(devtool);
+  devtoolWrapper.style.position = "fixed";
+  devtoolWrapper.style.top = "8px";
+  devtoolWrapper.style.left = "8px";
+
+  devtoolWrapper.id = DEVTOOL_WRAPPER_ID;
+  devtoolWrapper.innerHTML = renderDevtool();
+
+  document.body.appendChild(devtoolWrapper);
+
+  const iconButton = getDevtoolIconElement();
+
+  if (iconButton) {
+    iconButton.addEventListener("click", toggle);
+    makeElementDraggable(iconButton, devtoolWrapper);
+  }
+
+  [DEVTOOL_CLOSE_ICON_ID, DEVTOOL_SOCKET_ICON_ID].forEach(icon => {
+    const buttonIcon = document.getElementById(icon);
+
+    if (buttonIcon) {
+      buttonIcon.style.position = "absolute";
+      buttonIcon.style.top = "50%";
+      buttonIcon.style.left = "50%";
+      buttonIcon.style.transform = "translate(-50%, -50%)";
+      buttonIcon.style.transition = "opacity 0.2s";
+
+      if (icon === DEVTOOL_CLOSE_ICON_ID) {
+        buttonIcon.style.opacity = "0";
+      }
+    }
+  });
+
   updateInfoSection();
 };
 
