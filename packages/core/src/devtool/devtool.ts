@@ -56,6 +56,7 @@ const devtool: DevtoolState = {
 let active = false;
 let expanded = false;
 let zIndex: number = NaN;
+let zIndex: number = NaN;
 
 export const renderDivider = () => {
   return `<hr color="#222222" />`;
@@ -70,6 +71,7 @@ export const renderChipGroup = (items: string[]) => {
     overflow: "hidden",
     "white-space": "nowrap",
     "text-overflow": "ellipsis",
+    "overscroll-behavior-y": "contain",
   });
 
   const chipGroupStyle = generateInlineStyle({
@@ -167,6 +169,7 @@ export const renderLogs = () => {
     style: generateInlineStyle({
       "max-height": "20rem",
       overflow: "scroll",
+      "overscroll-behavior-y": "contain",
     }),
   });
 
@@ -332,6 +335,12 @@ export const show = () => {
     devtoolWrapper.style.zIndex = `${zIndex}`;
   }
 
+  if (Number.isNaN(zIndex)) {
+    throw new Error("No z-index was set for the devtool.");
+  } else {
+    devtoolWrapper.style.zIndex = `${zIndex}`;
+  }
+
   devtoolWrapper.style.position = "fixed";
   devtoolWrapper.style.top = "8px";
   devtoolWrapper.style.left = "8px";
@@ -342,6 +351,13 @@ export const show = () => {
   document.body.appendChild(devtoolWrapper);
 
   const iconButton = getDevtoolIconElement();
+
+  const iconButton = getDevtoolIconElement();
+
+  if (iconButton) {
+    iconButton.addEventListener("click", toggle);
+    makeElementDraggable(iconButton, devtoolWrapper);
+  }
 
   if (iconButton) {
     iconButton.addEventListener("click", toggle);
