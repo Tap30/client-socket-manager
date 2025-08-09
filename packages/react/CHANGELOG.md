@@ -1,5 +1,15 @@
 # @tapsioss/react-client-socket-manager
 
+## 0.6.1
+### Patch Changes
+
+
+
+- [#25](https://github.com/Tap30/client-socket-manager/pull/25) [`028d050`](https://github.com/Tap30/client-socket-manager/commit/028d05039f061d93dfdf197581f3146dbb7a1b62) Thanks [@amir78729](https://github.com/amir78729)! - Sync devtool with socket instance.
+
+- Updated dependencies [[`028d050`](https://github.com/Tap30/client-socket-manager/commit/028d05039f061d93dfdf197581f3146dbb7a1b62)]:
+  - @tapsioss/client-socket-manager@0.6.1
+
 ## 0.6.0
 ### Patch Changes
 
