@@ -19,6 +19,7 @@ import {
 import { FixedQueue } from "./FixedQueue.ts";
 import { type DevtoolState, type Log } from "./types.ts";
 import {
+  formatDate,
   generateAttributes,
   generateInlineStyle,
   makeElementDraggable,
@@ -152,7 +153,7 @@ export const renderLog = (log: Log) => {
 
   return `
   <div class="${DEVTOOL_LOGS_SECTION_ID}-item">
-    <p style="${timeStyle}">${log.date.toISOString()}</p>
+    <p style="${timeStyle}">${formatDate(log.date)}</p>
     <p style="${titleStyle}">${log.type}</p>
     <p style="${detailStyle}">${log.detail}</p>
   </div>
@@ -276,12 +277,62 @@ export const updateInfoSection = () => {
   return infoSection;
 };
 
-const init = () => {
+export const setZIndex = (z: number) => {
+  zIndex = z;
+};
+
+export const hide = () => {
+  getDevtoolWrapperElement()?.remove();
+
+  active = false;
+  expanded = false;
+};
+
+export const dispose = () => {
+  update(s => {
+    s.channels.clear();
+    s.logs.clear();
+    s.status = Status.UNKNOWN;
+  });
+  hide();
+};
+
+const toggle = () => {
+  const socketIcon = getDevtoolSocketIconElement()!;
+  const closeIcon = getDevtoolCloseIconElement()!;
+  const info = getDevtoolInfoElement()!;
+
+  expanded = !expanded;
+  socketIcon.style.opacity = !expanded ? "1" : "0";
+  closeIcon.style.opacity = expanded ? "1" : "0";
+  info.style.opacity = expanded ? "1" : "0";
+  info.style.transform = `scale(${expanded ? "1" : "0"})`;
+  getDevtoolInfoElement()?.setAttribute(
+    "data-open",
+    expanded ? "true" : "false",
+  );
+};
+
+export const update = (cb: (s: typeof devtool) => void) => {
+  cb?.(devtool);
+
+  if (active) {
+    updateInfoSection();
+  }
+};
+
+export const show = () => {
   if (active) return;
 
   active = true;
 
   const devtoolWrapper = document.createElement("div");
+
+  if (Number.isNaN(zIndex)) {
+    throw new Error("No z-index was set for the devtool.");
+  } else {
+    devtoolWrapper.style.zIndex = `${zIndex}`;
+  }
 
   if (Number.isNaN(zIndex)) {
     throw new Error("No z-index was set for the devtool.");
@@ -305,6 +356,11 @@ const init = () => {
     makeElementDraggable(iconButton, devtoolWrapper);
   }
 
+  if (iconButton) {
+    iconButton.addEventListener("click", toggle);
+    makeElementDraggable(iconButton, devtoolWrapper);
+  }
+
   [DEVTOOL_CLOSE_ICON_ID, DEVTOOL_SOCKET_ICON_ID].forEach(icon => {
     const buttonIcon = document.getElementById(icon);
 
@@ -320,54 +376,7 @@ const init = () => {
       }
     }
   });
-};
 
-export const setZIndex = (z: number) => {
-  zIndex = z;
-};
-
-export const dispose = () => {
-  getDevtoolWrapperElement()?.remove();
-
-  active = false;
-  expanded = false;
-};
-
-const toggle = () => {
-  const socketIcon = getDevtoolSocketIconElement()!;
-  const closeIcon = getDevtoolCloseIconElement()!;
-  const info = getDevtoolInfoElement()!;
-
-  expanded = !expanded;
-  socketIcon.style.opacity = !expanded ? "1" : "0";
-  closeIcon.style.opacity = expanded ? "1" : "0";
-  info.style.opacity = expanded ? "1" : "0";
-  info.style.transform = `scale(${expanded ? "1" : "0"})`;
-  getDevtoolInfoElement()?.setAttribute(
-    "data-open",
-    expanded ? "true" : "false",
-  );
-};
-
-type RenderOptions = {
-  action?: (s: typeof devtool) => void;
-  force?: boolean;
-};
-
-export const render = (options?: RenderOptions) => {
-  const { action, force = false } = options ?? {};
-
-  if (force) {
-    init();
-  } else {
-    if (!active) return;
-
-    const devtoolElement = getDevtoolElement();
-
-    if (!devtoolElement) init();
-  }
-
-  action?.(devtool);
   updateInfoSection();
 };
 

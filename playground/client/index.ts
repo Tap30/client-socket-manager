@@ -5,7 +5,8 @@ import { ClientSocketManager } from "@tapsioss/client-socket-manager";
 
 const socketManager = new ClientSocketManager("http://localhost:3000", {
   devtool: {
-    enabled: true,
+    enabled: false,
+    zIndex: 2000,
   },
   eventHandlers: {
     onReconnectingError(err) {

@@ -11,14 +11,7 @@ import * as devtool from "./devtool.ts";
 describe("Devtool", () => {
   beforeEach(() => {
     devtool.setZIndex(99999);
-    devtool.render({
-      force: true,
-      action: s => {
-        s.channels.clear();
-        s.status = devtool.Status.UNKNOWN;
-        s.logs.clear();
-      },
-    });
+    devtool.show();
   });
 
   afterEach(() => {
@@ -36,22 +29,19 @@ describe("Devtool", () => {
   it("should not double-init", () => {
     const originalWrapper = devtool.getDevtoolWrapperElement();
 
-    devtool.render(); // re-init should do nothing
     expect(document.querySelectorAll(`#${DEVTOOL_WRAPPER_ID}`)).toHaveLength(1);
     expect(devtool.getDevtoolWrapperElement()).toBe(originalWrapper);
   });
 
   it("should dispose properly", () => {
-    devtool.dispose();
+    devtool.hide();
     expect(devtool.getDevtoolWrapperElement()).toBeNull();
   });
 
   it("should be able to update status of the socket using render", () => {
     Object.values(Status).forEach(status => {
-      devtool.render({
-        action: state => {
-          state.status = status;
-        },
+      devtool.update(state => {
+        state.status = status;
       });
 
       expect(devtool.getDevtoolInfoElement()!.innerHTML).toContain(status);
@@ -65,12 +55,10 @@ describe("Devtool", () => {
       date: new Date(),
     };
 
-    devtool.render({
-      action: state => {
-        state.logs.enqueue(mockLog);
-        state.channels.add("my-channel");
-        state.status = Status.DISCONNECTED;
-      },
+    devtool.update(state => {
+      state.logs.enqueue(mockLog);
+      state.channels.add("my-channel");
+      state.status = Status.DISCONNECTED;
     });
 
     const info = devtool.getDevtoolInfoElement();
@@ -97,14 +85,12 @@ describe("Devtool", () => {
 
     // Fill the logs
     for (let i = 0; i < LOG_CAPACITY; i++) {
-      devtool.render({
-        action: state => {
-          state.logs.enqueue({
-            type: LogType.CONNECTION_ERROR,
-            detail: `log-${i}`,
-            date: new Date(),
-          });
-        },
+      devtool.update(state => {
+        state.logs.enqueue({
+          type: LogType.CONNECTION_ERROR,
+          detail: `log-${i}`,
+          date: new Date(),
+        });
       });
     }
 
@@ -118,14 +104,12 @@ describe("Devtool", () => {
     expect(devtool.getDevtoolLogSectionElement()!.innerHTML).toContain(`log-0`);
 
     // after adding new log, the first element will not be available and the new log will append to the queue.
-    devtool.render({
-      action: state => {
-        state.logs.enqueue({
-          type: LogType.CONNECTION_ERROR,
-          detail: `log-${LOG_CAPACITY}`,
-          date: new Date(),
-        });
-      },
+    devtool.update(state => {
+      state.logs.enqueue({
+        type: LogType.CONNECTION_ERROR,
+        detail: `log-${LOG_CAPACITY}`,
+        date: new Date(),
+      });
     });
 
     expect(devtool.getDevtoolLogSectionElement()!.innerHTML).not.toContain(
