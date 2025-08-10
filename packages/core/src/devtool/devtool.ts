@@ -143,6 +143,7 @@ export const renderLog = (log: Log) => {
     "font-size": "0.625rem",
     "margin-top": "0",
     color: LogTypeColor[log.type],
+    "overflow-wrap": "break-word",
   });
 
   const timeStyle = generateInlineStyle({
