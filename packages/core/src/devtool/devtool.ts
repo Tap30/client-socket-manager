@@ -283,8 +283,8 @@ export const updateInfoSection = () => {
     </div>
   `;
 
-  logSectionScroll.setElement(getDevtoolLogSectionElement());
-  channelsSectionScroll.setElement(getDevtoolChannelsElement());
+  logSectionScroll.setTarget(getDevtoolLogSectionElement());
+  channelsSectionScroll.setTarget(getDevtoolChannelsElement());
 
   logSectionScroll.restore();
   channelsSectionScroll.restore();

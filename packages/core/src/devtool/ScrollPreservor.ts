@@ -1,12 +1,12 @@
 export class ScrollPreservor {
   private _savedScrollPosition: number = 0;
-  private _element: HTMLElement | null = null;
+  private _target: HTMLElement | null = null;
 
-  constructor(options?: { element?: HTMLElement | null }) {
-    const { element } = options ?? {};
+  constructor(options?: { target?: HTMLElement | null }) {
+    const { target } = options ?? {};
 
-    if (element) {
-      this._element = element;
+    if (target) {
+      this._target = target;
     }
   }
 
@@ -14,12 +14,12 @@ export class ScrollPreservor {
    * Sets the HTML element to monitor.
    * @param target The HTML element to monitor.
    */
-  public setElement(target: HTMLElement | null): void {
+  public setTarget(target: HTMLElement | null): void {
     if (!target) {
       return;
     }
 
-    this._element = target;
+    this._target = target;
   }
 
   public get savedScrollPosition(): number {
@@ -31,11 +31,11 @@ export class ScrollPreservor {
    * This method stores the `scrollTop` value of the currently set element.
    */
   public save(): void {
-    if (!this._element) {
+    if (!this._target) {
       return;
     }
 
-    this._savedScrollPosition = this._element.scrollTop;
+    this._savedScrollPosition = this._target.scrollTop;
   }
 
   /**
@@ -43,10 +43,10 @@ export class ScrollPreservor {
    * This method sets the `scrollTop` value of the element to the previously saved position.
    */
   public restore(): void {
-    if (!this._element) {
+    if (!this._target) {
       return;
     }
 
-    this._element.scrollTop = this._savedScrollPosition;
+    this._target.scrollTop = this._savedScrollPosition;
   }
 }

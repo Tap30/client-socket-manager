@@ -9,7 +9,7 @@ describe("ScrollPreservor", () => {
     // Set up a mock HTML element for testing
     element = document.createElement("div");
     Object.defineProperty(element, "scrollTop", { writable: true, value: 0 });
-    scrollPreservor = new ScrollPreservor({ element });
+    scrollPreservor = new ScrollPreservor({ target: element });
   });
 
   it("should be able to set and save the scroll position", () => {
@@ -53,7 +53,7 @@ describe("ScrollPreservor", () => {
     const scrollPosition = 75;
 
     // Set the new element and test saving and restoring
-    scrollPreservor.setElement(newElement);
+    scrollPreservor.setTarget(newElement);
     scrollPreservor.save();
 
     expect(scrollPreservor.savedScrollPosition).toBe(scrollPosition);
@@ -73,19 +73,19 @@ describe("ScrollPreservor", () => {
   });
 
   it("should handle saving with a null element", () => {
-    const newScrollPreservor = new ScrollPreservor({ element: null });
+    const newScrollPreservor = new ScrollPreservor({ target: null });
 
     expect(() => newScrollPreservor.save()).not.toThrow();
   });
 
   it("should handle restoring with a null element", () => {
-    const newScrollPreservor = new ScrollPreservor({ element: null });
+    const newScrollPreservor = new ScrollPreservor({ target: null });
 
     expect(() => newScrollPreservor.restore()).not.toThrow();
   });
 
   it("should correctly handle setting a null element", () => {
-    scrollPreservor.setElement(null);
+    scrollPreservor.setTarget(null);
     expect(() => scrollPreservor.save()).not.toThrow();
     expect(() => scrollPreservor.restore()).not.toThrow();
   });
