@@ -123,4 +123,36 @@ describe("Devtool", () => {
       document.querySelectorAll(`.${DEVTOOL_LOGS_SECTION_ID}-item`),
     ).toHaveLength(LOG_CAPACITY);
   });
+
+  it("should preserve scroll position when updating", () => {
+    // Populate logs to make the log section scrollable
+    for (let i = 0; i < LOG_CAPACITY; i++) {
+      devtool.update(state => {
+        state.logs.enqueue({
+          type: LogType.CONNECTION_ERROR,
+          detail: `log-${i}`,
+          date: new Date(),
+        });
+      });
+    }
+
+    const logSection = devtool.getDevtoolLogSectionElement()!;
+    const scrollPosition = 50;
+
+    logSection.scrollTop = scrollPosition;
+    expect(logSection.scrollTop).toBe(scrollPosition);
+
+    // Update the devtool and check if the scroll position is preserved
+    devtool.update(state => {
+      state.logs.enqueue({
+        type: LogType.CONNECTION_ERROR,
+        detail: "new log",
+        date: new Date(),
+      });
+    });
+
+    const newLogSection = devtool.getDevtoolLogSectionElement()!;
+
+    expect(newLogSection.scrollTop).toBe(scrollPosition);
+  });
 });

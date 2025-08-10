@@ -17,6 +17,7 @@ import {
   StatusColorMap,
 } from "./constants.ts";
 import { FixedQueue } from "./FixedQueue.ts";
+import { ScrollPreservor } from "./ScrollPreservor.ts";
 import { type DevtoolState, type Log } from "./types.ts";
 import {
   formatDate,
@@ -104,6 +105,9 @@ export const getDevtoolSocketIconElement = () =>
   document.getElementById(DEVTOOL_SOCKET_ICON_ID);
 export const getDevtoolCloseIconElement = () =>
   document.getElementById(DEVTOOL_CLOSE_ICON_ID);
+
+const channelsSectionScroll = new ScrollPreservor();
+const logSectionScroll = new ScrollPreservor();
 
 export const renderChannels = () => {
   const { channels } = devtool;
@@ -250,6 +254,10 @@ export const renderDevtool = () => {
 };
 
 export const updateInfoSection = () => {
+  // Save scroll positions before updating the content
+  logSectionScroll.save();
+  channelsSectionScroll.save();
+
   const infoSection = getDevtoolInfoElement()!;
 
   const devtoolInfoStyle = generateInlineStyle({
@@ -274,6 +282,12 @@ export const updateInfoSection = () => {
       ${renderLogs()} 
     </div>
   `;
+
+  logSectionScroll.setTarget(getDevtoolLogSectionElement());
+  channelsSectionScroll.setTarget(getDevtoolChannelsElement());
+
+  logSectionScroll.restore();
+  channelsSectionScroll.restore();
 
   return infoSection;
 };
