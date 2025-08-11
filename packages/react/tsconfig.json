@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["@testing-library/jest-dom"]
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["src"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src", "./setup-tests.ts"]
 }

@@ -1,9 +1,9 @@
-import { act, render, screen } from "@repo/test-helpers";
 import {
   ClientSocketManager,
   ClientSocketManagerStub,
   type ClientSocketManagerOptions,
 } from "@tapsioss/client-socket-manager";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import {
   beforeEach,
   describe,
@@ -34,6 +34,7 @@ vitest.mock("@tapsioss/client-socket-manager", async () => {
 describe("SocketClientProvider", () => {
   beforeEach(() => {
     vitest.clearAllMocks();
+    cleanup();
   });
 
   const socketServerUri = "http://localhost:3000";

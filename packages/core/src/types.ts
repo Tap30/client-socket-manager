@@ -2,10 +2,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ManagerOptions, Socket, SocketOptions } from "socket.io-client";
-import type { DisconnectDescription } from "socket.io-client/build/esm/socket";
-import type ClientSocketManager from "./ClientSocketManager";
+import type ClientSocketManager from "./ClientSocketManager.ts";
 
 export type SubscribeCallback = (...args: any[]) => void;
+
+type DisconnectDescription =
+  | Error
+  | {
+      description: string;
+      context?: unknown;
+    };
 
 export type EventsMap = Record<string, any>;
 export type DefaultEventsMap = Record<string, SubscribeCallback>;

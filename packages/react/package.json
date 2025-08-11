@@ -3,19 +3,19 @@
   "version": "0.6.0",
   "type": "module",
   "packageManager": "pnpm@9.15.0",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/cjs/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "./dist",
-    "./README.md",
-    "./LICENSE"
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
-      "types": "./dist/cjs/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "keywords": [
@@ -34,20 +34,33 @@
   },
   "scripts": {
     "clear": "shx rm -rf dist",
-    "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "build:esm": "tsc --project ./tsconfig.esm.json",
+    "test": "vitest run",
+    "test:dev": "vitest",
     "prebuild": "pnpm run clear",
-    "build": "run-p build:*",
+    "build": "wireit",
     "release": "pnpm publish . --tag latest --access public --no-git-checks"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsup",
+      "files": [
+        "./tsconfig.json",
+        "./tsup.config.ts",
+        "./src/**/*",
+        "!./src/**/*.test.{ts,tsx}"
+      ],
+      "output": [
+        "./dist/**/*",
+        "./dist/**/*.tsbuildinfo"
+      ]
+    }
   },
   "dependencies": {
     "@tapsioss/client-socket-manager": "workspace:*"
   },
-  "devDependencies": {
-    "@repo/test-helpers": "workspace:*"
-  },
   "peerDependencies": {
     "react": ">=16.8",
+    "react-dom": ">=16.8",
     "socket.io-client": "^4.8.1"
   }
 }

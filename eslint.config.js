@@ -11,10 +11,9 @@ import { config, configs as tsLintConfigs } from "typescript-eslint";
 export default config(
   jsLint.configs.recommended,
   ...tsLintConfigs.recommendedTypeChecked,
-  /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   importPlugin.flatConfigs.recommended,
   importPlugin.flatConfigs.typescript,
-  /* eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
   prettierRecommendedConfig,
   {
     files: ["*.ts", "*.tsx"],

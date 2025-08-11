@@ -172,7 +172,7 @@ export const renderLogs = () => {
     id: DEVTOOL_LOGS_SECTION_ID,
     style: generateInlineStyle({
       "max-height": "20rem",
-      overflow: "scroll",
+      overflow: "auto",
       "overscroll-behavior-y": "contain",
     }),
   });
@@ -279,7 +279,7 @@ export const updateInfoSection = () => {
     <div style="${devtoolInfoStyle}">
       ${renderStatus()}
       ${renderChannels()}
-      ${renderLogs()} 
+      ${renderLogs()}
     </div>
   `;
 

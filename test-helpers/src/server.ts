@@ -4,7 +4,6 @@ import { Server } from "socket.io";
 
 const app = express();
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 const httpServer = createServer(app);
 const socketServer = new Server(httpServer, {
   cors: { origin: "*" },

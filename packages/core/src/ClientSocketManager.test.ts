@@ -14,7 +14,7 @@ import {
   expect,
   it,
 } from "vitest";
-import * as devtool from "./devtool/devtool.ts";
+import { devtool } from "./devtool/index.ts";
 import { ClientSocketManager } from "./index.ts";
 
 describe("ClientSocketManager: unit tests", () => {
