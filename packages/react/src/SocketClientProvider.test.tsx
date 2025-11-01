@@ -154,4 +154,28 @@ describe("SocketClientProvider", () => {
     );
     expect(screen.getByTestId("socket-instance")).toHaveTextContent("false");
   });
+
+  it("should use ClientSocketManagerStub when shouldUseStob is true", () => {
+    const uri = "http://localhost:4000";
+
+    render(
+      <SocketClientProvider
+        uri={uri}
+        shouldUseStob
+      >
+        <SocketContext.Consumer>
+          {value => (
+            <div data-testid="socket-type">
+              {value?.socket instanceof ClientSocketManagerStub
+                ? "stub"
+                : "real"}
+            </div>
+          )}
+        </SocketContext.Consumer>
+      </SocketClientProvider>,
+    );
+
+    // Should have used the stubbed manager directly
+    expect(screen.getByTestId("socket-type")).toHaveTextContent("stub");
+  });
 });
