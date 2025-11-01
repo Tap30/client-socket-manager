@@ -178,4 +178,148 @@ describe("SocketClientProvider", () => {
     // Should have used the stubbed manager directly
     expect(screen.getByTestId("socket-type")).toHaveTextContent("stub");
   });
+
+  it("should handle onReconnecting event and update connection status", () => {
+    const onReconnectingMock = vitest.fn();
+    const uri = "http://localhost:5000";
+
+    render(
+      <SocketClientProvider
+        uri={uri}
+        eventHandlers={{
+          onReconnecting: onReconnectingMock,
+        }}
+      >
+        <SocketContext.Consumer>
+          {value => (
+            <div data-testid="connection-status">{value?.connectionStatus}</div>
+          )}
+        </SocketContext.Consumer>
+      </SocketClientProvider>,
+    );
+
+    const mockCalls = (
+      ClientSocketManager as MockedClass<typeof ClientSocketManager>
+    ).mock.calls;
+
+    expect(mockCalls.length).toBeGreaterThan(0);
+
+    const firstCall = mockCalls[0];
+    const passedOptions = firstCall?.[1];
+
+    expect(passedOptions).toBeDefined();
+    expect(passedOptions!.eventHandlers).toBeDefined();
+
+    // Simulate onReconnecting event
+    act(() => {
+      passedOptions!.eventHandlers!.onReconnecting!.call(
+        {} as unknown as ClientSocketManager, // mock this context
+        2, // attempt number
+      );
+    });
+
+    expect(onReconnectingMock).toHaveBeenCalledWith(2);
+    expect(screen.getByTestId("connection-status")).toHaveTextContent(
+      ConnectionStatus.RECONNECTING,
+    );
+  });
+
+  it("should handle onSocketConnection event and update connection status", () => {
+    const onSocketConnectionMock = vitest.fn();
+    const uri = "http://localhost:6000";
+
+    render(
+      <SocketClientProvider
+        uri={uri}
+        eventHandlers={{
+          onSocketConnection: onSocketConnectionMock,
+        }}
+      >
+        <SocketContext.Consumer>
+          {value => (
+            <div data-testid="connection-status">{value?.connectionStatus}</div>
+          )}
+        </SocketContext.Consumer>
+      </SocketClientProvider>,
+    );
+
+    const mockCalls = (
+      ClientSocketManager as MockedClass<typeof ClientSocketManager>
+    ).mock.calls;
+
+    expect(mockCalls.length).toBeGreaterThan(0);
+
+    const firstCall = mockCalls[0];
+    const passedOptions = firstCall?.[1];
+
+    expect(passedOptions).toBeDefined();
+    expect(passedOptions!.eventHandlers).toBeDefined();
+
+    // Simulate the socket connection event
+    act(() => {
+      passedOptions!.eventHandlers!.onSocketConnection!.call(
+        {} as unknown as ClientSocketManager, // fake "this" context
+      );
+    });
+
+    // Ensure our custom event handler ran
+    expect(onSocketConnectionMock).toHaveBeenCalled();
+
+    // Ensure the provider updated its context to CONNECTED
+    expect(screen.getByTestId("connection-status")).toHaveTextContent(
+      ConnectionStatus.CONNECTED,
+    );
+  });
+
+  it("should handle onSocketDisconnection event and update connection status", () => {
+    const onSocketDisconnectionMock = vitest.fn();
+    const uri = "http://localhost:7000";
+
+    render(
+      <SocketClientProvider
+        uri={uri}
+        eventHandlers={{
+          onSocketDisconnection: onSocketDisconnectionMock,
+        }}
+      >
+        <SocketContext.Consumer>
+          {value => (
+            <div data-testid="connection-status">{value?.connectionStatus}</div>
+          )}
+        </SocketContext.Consumer>
+      </SocketClientProvider>,
+    );
+
+    const mockCalls = (
+      ClientSocketManager as MockedClass<typeof ClientSocketManager>
+    ).mock.calls;
+
+    expect(mockCalls.length).toBeGreaterThan(0);
+
+    const firstCall = mockCalls[0];
+    const passedOptions = firstCall?.[1];
+
+    expect(passedOptions).toBeDefined();
+    expect(passedOptions!.eventHandlers).toBeDefined();
+
+    const reason = "ping timeout";
+    const details = { description: "" };
+
+    // Simulate the disconnection event
+    act(() => {
+      passedOptions!.eventHandlers!.onSocketDisconnection!.call(
+        {} as unknown as ClientSocketManager, // fake "this"
+        reason,
+        details,
+      );
+    });
+
+    // Expect our custom handler to be called correctly
+    expect(onSocketDisconnectionMock).toHaveBeenCalledWith(reason, details);
+
+    // Expect the connection status to update to DISCONNECTED
+    expect(screen.getByTestId("connection-status")).toHaveTextContent(
+      ConnectionStatus.DISCONNECTED,
+    );
+  });
 });
