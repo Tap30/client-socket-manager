@@ -4,7 +4,7 @@ import {
   socketServer,
 } from "@repo/test-helpers";
 import type { AddressInfo } from "net";
-import type { Socket as ClientSocket } from "socket.io-client";
+import { type Socket as ClientSocket } from "socket.io-client";
 import {
   afterAll,
   afterEach,
@@ -13,9 +13,11 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from "vitest";
 import { devtool } from "./devtool/index.ts";
-import { ClientSocketManager } from "./index.ts";
+import { type DevtoolState } from "./devtool/types.ts";
+import { ClientSocketManager, ManagerReservedEvents } from "./index.ts";
 
 describe("ClientSocketManager: unit tests", () => {
   let httpServerAddr: AddressInfo | string | null = null;
@@ -534,5 +536,425 @@ describe("ClientSocketManager: unit tests", () => {
 
     // Clean up the overlay div
     document.body.removeChild(overlayDiv);
+  });
+
+  it("should handle manager connection error event and log to devtool", async () => {
+    const connectResolver = createPromiseResolvers();
+    const connectionErrorResolver = createPromiseResolvers<Error>();
+
+    // Spy on devtool.update to inspect logs
+    const devtoolUpdateSpy = vi.spyOn(devtool, "update");
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: { enabled: true },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onConnectionError(error) {
+          connectionErrorResolver.resolve(error);
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const fakeError = new Error("Simulated manager connection error");
+
+    // Emit the event from the Manager layer
+    // @ts-expect-error accessing private manager for testing
+    socketManager._socket.io.emit<"error">(
+      ManagerReservedEvents.CONNECTION_ERROR,
+      fakeError,
+    );
+
+    const receivedError = await connectionErrorResolver.promise;
+
+    expect(receivedError).toBe(fakeError);
+
+    // Validate that devtool.update was called with a CONNECTION_ERROR log entry
+    expect(devtoolUpdateSpy).toHaveBeenCalledWith(expect.any(Function));
+
+    // Run the updater callback to inspect its behavior
+    const updateFn = devtoolUpdateSpy.mock.calls.at(-1)![0];
+    const mockState = {
+      logs: {
+        enqueue: vi.fn(),
+      },
+    } as unknown as DevtoolState;
+
+    updateFn(mockState);
+
+    expect(mockState.logs.enqueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: devtool.LogType.CONNECTION_ERROR,
+        detail: fakeError.message,
+      }),
+    );
+
+    devtoolUpdateSpy.mockRestore();
+  });
+
+  it("should handle server ping event when onServerPing is provided", async () => {
+    const connectResolver = createPromiseResolvers();
+    const pingResolver = createPromiseResolvers<void>();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onServerPing() {
+          // Verify the callback runs with correct context
+          expect(this).toBe(socketManager);
+          pingResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    // Simulate a server ping event on the manager layer
+    // @ts-expect-error accessing private manager instance for testing
+    socketManager._socket.io.emit(ManagerReservedEvents.SERVER_PING);
+
+    await pingResolver.promise;
+  });
+
+  it("should handle manager reconnecting event and log to devtool", async () => {
+    const connectResolver = createPromiseResolvers();
+    const reconnectingResolver = createPromiseResolvers<number>();
+
+    const devtoolUpdateSpy = vi.spyOn(devtool, "update");
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: { enabled: true },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onReconnecting(attempt) {
+          // Verify correct context and argument
+          expect(this).toBe(socketManager);
+          reconnectingResolver.resolve(attempt);
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const attemptNumber = 3;
+
+    // Simulate Manager's RECONNECTING event
+    // @ts-expect-error access private Manager instance for testing
+    socketManager._socket.io.emit<"reconnect_attempt">(
+      ManagerReservedEvents.RECONNECTING,
+      attemptNumber,
+    );
+
+    const receivedAttempt = await reconnectingResolver.promise;
+
+    expect(receivedAttempt).toBe(attemptNumber);
+
+    // Validate devtool update behavior
+    expect(devtoolUpdateSpy).toHaveBeenCalledWith(expect.any(Function));
+
+    const updateFn = devtoolUpdateSpy.mock.calls.at(-1)![0];
+    const mockState = {
+      status: "",
+      logs: { enqueue: vi.fn() },
+    } as unknown as DevtoolState;
+
+    updateFn(mockState);
+
+    expect(mockState.status).toBe(devtool.Status.RECONNECTING);
+    expect(mockState.logs.enqueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: devtool.LogType.RECONNECTING,
+        detail: `Reconnecting... (${attemptNumber} attempt(s))`,
+      }),
+    );
+
+    devtoolUpdateSpy.mockRestore();
+  });
+
+  it("should handle manager reconnecting error event and log to devtool", async () => {
+    const connectResolver = createPromiseResolvers();
+    const reconnectingErrorResolver = createPromiseResolvers<Error>();
+
+    const devtoolUpdateSpy = vi.spyOn(devtool, "update");
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: { enabled: true },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onReconnectingError(error) {
+          expect(this).toBe(socketManager);
+          reconnectingErrorResolver.resolve(error);
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const fakeError = new Error("Reconnecting error occurred");
+
+    // @ts-expect-error access private Manager instance for testing
+    socketManager._socket.io.emit<"reconnect_error">(
+      ManagerReservedEvents.RECONNECTING_ERROR,
+      fakeError,
+    );
+
+    const receivedError = await reconnectingErrorResolver.promise;
+
+    expect(receivedError).toBe(fakeError);
+
+    expect(devtoolUpdateSpy).toHaveBeenCalledWith(expect.any(Function));
+    const updateFn = devtoolUpdateSpy.mock.calls.at(-1)![0];
+
+    const mockState = { logs: { enqueue: vi.fn() } } as unknown as DevtoolState;
+
+    updateFn(mockState);
+
+    expect(mockState.logs.enqueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: devtool.LogType.RECONNECTING_ERROR,
+        detail: fakeError.message,
+      }),
+    );
+
+    devtoolUpdateSpy.mockRestore();
+  });
+
+  it("should handle manager reconnection failure event and log to devtool", async () => {
+    const connectResolver = createPromiseResolvers();
+    const failureResolver = createPromiseResolvers<void>();
+
+    const devtoolUpdateSpy = vi.spyOn(devtool, "update");
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: { enabled: true },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onReconnectionFailure() {
+          expect(this).toBe(socketManager);
+          failureResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    // @ts-expect-error access private Manager instance for testing
+    socketManager._socket.io.emit(ManagerReservedEvents.RECONNECTION_FAILURE);
+
+    await failureResolver.promise;
+
+    expect(devtoolUpdateSpy).toHaveBeenCalledWith(expect.any(Function));
+    const updateFn = devtoolUpdateSpy.mock.calls.at(-1)![0];
+
+    const mockState = { logs: { enqueue: vi.fn() } } as unknown as DevtoolState;
+
+    updateFn(mockState);
+
+    expect(mockState.logs.enqueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: devtool.LogType.RECONNECTION_FAILURE,
+        detail: "Failed to reconnect.",
+      }),
+    );
+
+    devtoolUpdateSpy.mockRestore();
+  });
+
+  it("should handle manager successful reconnection event and log to devtool", async () => {
+    const connectResolver = createPromiseResolvers();
+    const successResolver = createPromiseResolvers<number>();
+
+    const devtoolUpdateSpy = vi.spyOn(devtool, "update");
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      devtool: { enabled: true },
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        onSuccessfulReconnection(attempt) {
+          expect(this).toBe(socketManager);
+          successResolver.resolve(attempt);
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const attemptNumber = 2;
+
+    // @ts-expect-error access private Manager instance for testing
+    socketManager._socket.io.emit<"reconnect">(
+      ManagerReservedEvents.SUCCESSFUL_RECONNECTION,
+      attemptNumber,
+    );
+
+    const receivedAttempt = await successResolver.promise;
+
+    expect(receivedAttempt).toBe(attemptNumber);
+
+    expect(devtoolUpdateSpy).toHaveBeenCalledWith(expect.any(Function));
+    const updateFn = devtoolUpdateSpy.mock.calls.at(-1)![0];
+
+    const mockState = { logs: { enqueue: vi.fn() } } as unknown as DevtoolState;
+
+    updateFn(mockState);
+
+    expect(mockState.logs.enqueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: devtool.LogType.SUCCESSFUL_RECONNECTION,
+        detail: `Successfully connected after ${attemptNumber} attempt(s)`,
+      }),
+    );
+
+    devtoolUpdateSpy.mockRestore();
+  });
+
+  describe("_handleVisibilityChange", () => {
+    let socketManager: ClientSocketManager;
+
+    beforeEach(() => {
+      socketManager = new ClientSocketManager("fakeUrl", {
+        eventHandlers: {
+          onVisiblePage: vi.fn(),
+          onHiddenPage: vi.fn(),
+        },
+      });
+
+      // Mock connect/disconnect to avoid real socket calls
+      socketManager.connect = vi.fn();
+      socketManager.disconnect = vi.fn();
+    });
+
+    it("should call onVisiblePage and reconnect if page becomes visible and not connected", () => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+
+      Object.defineProperty(socketManager, "connected", {
+        configurable: true,
+        value: false,
+      });
+
+      // @ts-expect-error private method access for testing
+      socketManager._handleVisibilityChange();
+
+      const { onVisiblePage } = socketManager["_inputListeners"];
+
+      expect(onVisiblePage).toHaveBeenCalledTimes(1);
+      expect(socketManager.connect).toHaveBeenCalledTimes(1);
+      expect(socketManager.disconnect).not.toHaveBeenCalled();
+    });
+
+    it("should call onHiddenPage and disconnect if page becomes hidden", () => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "hidden",
+      });
+
+      // @ts-expect-error private method access for testing
+      socketManager._handleVisibilityChange();
+
+      const { onHiddenPage } = socketManager["_inputListeners"];
+
+      expect(onHiddenPage).toHaveBeenCalledTimes(1);
+      expect(socketManager.disconnect).toHaveBeenCalledTimes(1);
+      expect(socketManager.connect).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing if visibilityState is neither visible nor hidden", () => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "prerender",
+      });
+
+      // @ts-expect-error private method access for testing
+      socketManager._handleVisibilityChange();
+
+      const { onVisiblePage, onHiddenPage } = socketManager["_inputListeners"];
+
+      expect(onVisiblePage).not.toHaveBeenCalled();
+      expect(onHiddenPage).not.toHaveBeenCalled();
+      expect(socketManager.connect).not.toHaveBeenCalled();
+      expect(socketManager.disconnect).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should call warnDisposedClient and return correct recovered state", async () => {
+    // Import utils dynamically without type imports
+    const utilsModule = await vi.importActual("./utils.ts");
+    const warnDisposedClientSpy = vi.spyOn(
+      utilsModule as { warnDisposedClient: (disposed: boolean) => void },
+      "warnDisposedClient",
+    );
+
+    const socketManager = new ClientSocketManager("http://localhost:3000", {});
+
+    // @ts-expect-error private field for testing
+    socketManager._socket = { recovered: true };
+
+    expect(socketManager.recovered).toBe(true);
+    expect(warnDisposedClientSpy).toHaveBeenCalledWith(socketManager.disposed);
+
+    // Simulate missing socket
+    // @ts-expect-error private field for testing
+    socketManager._socket = null;
+    expect(socketManager.recovered).toBe(false);
+
+    warnDisposedClientSpy.mockRestore();
+  });
+
+  it("should unsubscribe and remove abort event listener when signal aborts", async () => {
+    const connectResolver = createPromiseResolvers();
+    const unsubscribeSpy = vi.spyOn(
+      ClientSocketManager.prototype,
+      "unsubscribe",
+    );
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const testChannel = "test/abort";
+    const testCallback = vi.fn();
+
+    socketManager.subscribe(testChannel, testCallback, { signal });
+
+    // Abort the signal → triggers internal unsubscribe
+    controller.abort();
+
+    // Wait for unsubscribe logic to execute
+    await Promise.resolve();
+
+    // Verify unsubscribe was called
+    expect(unsubscribeSpy).toHaveBeenCalledWith(
+      testChannel,
+      expect.any(Function),
+    );
+
+    // Safely check for remaining listeners, explicitly typed
+    expect(signal.onabort).toBeNull();
+
+    unsubscribeSpy.mockRestore();
   });
 });
