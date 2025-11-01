@@ -309,6 +309,7 @@ export const dispose = () => {
     s.logs.clear();
     s.status = Status.UNKNOWN;
   });
+  zIndex = NaN;
   hide();
 };
 
@@ -342,12 +343,6 @@ export const show = () => {
   active = true;
 
   const devtoolWrapper = document.createElement("div");
-
-  if (Number.isNaN(zIndex)) {
-    throw new Error("No z-index was set for the devtool.");
-  } else {
-    devtoolWrapper.style.zIndex = `${zIndex}`;
-  }
 
   if (Number.isNaN(zIndex)) {
     throw new Error("No z-index was set for the devtool.");

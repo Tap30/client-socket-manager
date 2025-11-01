@@ -16,18 +16,36 @@ export const generateInlineStyle = (
     .join("; ");
 };
 
+export const resetDragState = () => {
+  x = 0;
+  y = 0;
+  initialX = 0;
+  initialY = 0;
+  didMove = false;
+  isDragStarted = false;
+};
+
 export const generateAttributes = (
   attrObject: Record<string, string | boolean>,
 ): string => {
   return Object.entries(attrObject)
-    .map(([cssKey, cssValue]) =>
-      typeof cssValue == "boolean"
-        ? cssValue
-          ? cssKey
-          : ""
-        : `${cssKey}="${cssValue}"`,
+    .map(([key, value]) =>
+      typeof value === "boolean" ? (value ? key : "") : `${key}="${value}"`,
     )
-    .join(" ");
+    .filter(Boolean) // remove empty strings
+    .join(" "); // no trailing space now
+};
+
+export const getClientX = (event: MouseEvent | TouchEvent) => {
+  if (event instanceof MouseEvent) return event.clientX;
+  if (event instanceof TouchEvent) return event.touches[0]?.clientX ?? 0;
+  return 0;
+};
+
+export const getClientY = (event: MouseEvent | TouchEvent) => {
+  if (event instanceof MouseEvent) return event.clientY;
+  if (event instanceof TouchEvent) return event.touches[0]?.clientY ?? 0;
+  return 0;
 };
 
 /**
@@ -58,20 +76,6 @@ export const makeElementDraggable = (
   dragHandle: HTMLElement,
   dragTarget: HTMLElement,
 ) => {
-  // Extract clientX from MouseEvent or TouchEvent
-  const getClientX = (event: MouseEvent | TouchEvent) => {
-    if (event instanceof MouseEvent) return event.clientX;
-    if (event instanceof TouchEvent) return event.touches[0]?.clientX ?? 0;
-    return 0;
-  };
-
-  // Extract clientY from MouseEvent or TouchEvent
-  const getClientY = (event: MouseEvent | TouchEvent) => {
-    if (event instanceof MouseEvent) return event.clientY;
-    if (event instanceof TouchEvent) return event.touches[0]?.clientY ?? 0;
-    return 0;
-  };
-
   // Suppress click after drag to avoid unintentional tap
   const suppressClickOnce = (e: MouseEvent) => {
     if (didMove) {
