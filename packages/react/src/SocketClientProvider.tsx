@@ -104,16 +104,17 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const ctx = useMemo<SocketContextValue>(
-    () => ({
-      connectionStatus,
-      get socket() {
-        if (!clientInstance) return null;
-        if (clientInstance.disposed) return null;
+  const ctx: SocketContextValue = useMemo(
+    () =>
+      ({
+        connectionStatus,
+        get socket() {
+          if (!clientInstance) return null;
+          if (clientInstance.disposed) return null;
 
-        return clientInstance;
-      },
-    }),
+          return clientInstance;
+        },
+      }) satisfies SocketContextValue,
     [connectionStatus, clientInstance],
   );
 
