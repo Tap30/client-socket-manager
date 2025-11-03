@@ -15,7 +15,7 @@ const config = defineConfig({
       exclude: [
         ...coverageConfigDefaults.exclude,
         "src/index.ts",
-        "src/types.ts",
+        "src/**/types.ts",
         "src/ClientSocketManagerStub.ts",
       ],
       thresholds: {

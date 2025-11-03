@@ -562,7 +562,7 @@ describe("ClientSocketManager: unit tests", () => {
     const fakeError = new Error("Simulated manager connection error");
 
     // Emit the event from the Manager layer
-    // @ts-expect-error accessing private manager for testing
+    // @ts-expect-error accessing private socket for testing
     socketManager._socket.io.emit<"error">(
       ManagerReservedEvents.CONNECTION_ERROR,
       fakeError,
@@ -956,5 +956,333 @@ describe("ClientSocketManager: unit tests", () => {
     expect(signal.onabort).toBeNull();
 
     unsubscribeSpy.mockRestore();
+  });
+
+  it("should reconnect when server disconnects and autoReconnectable is false", async () => {
+    const connectResolver = createPromiseResolvers();
+    const disconnectResolver = createPromiseResolvers();
+    const connectSpy = vi.spyOn(ClientSocketManager.prototype, "connect");
+    let connectionCount = 0;
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectionCount++;
+          connectResolver.resolve();
+        },
+        onSocketDisconnection(reason) {
+          if (reason === "io server disconnect") {
+            disconnectResolver.resolve();
+          }
+        },
+      },
+    });
+
+    await connectResolver.promise;
+    expect(connectionCount).toBe(1);
+
+    const connectedSocketsMap = socketServer.of("/").sockets;
+    const clientSocket = connectedSocketsMap.get(socketManager.id!);
+
+    expect(clientSocket).toBeDefined();
+
+    // Mock the socket's active getter to return false
+    // @ts-expect-error accessing private socket for testing
+    const activeSpy = vi.spyOn(socketManager._socket, "active", "get");
+
+    // @ts-expect-error mocking return value for testing
+    activeSpy.mockReturnValue(false);
+
+    expect(socketManager.autoReconnectable).toBe(false);
+
+    connectResolver.renew();
+
+    // Server disconnects - should trigger reconnection because autoReconnectable is false
+    clientSocket!.disconnect();
+
+    await disconnectResolver.promise;
+
+    // Check if connect was called internally
+    expect(connectSpy).toHaveBeenCalled();
+
+    await connectResolver.promise;
+
+    expect(connectionCount).toBe(2);
+    expect(socketManager.connected).toBe(true);
+
+    activeSpy.mockRestore();
+    connectSpy.mockRestore();
+  });
+
+  it("should unsubscribe all listeners when no callback is provided", async () => {
+    const connectResolver = createPromiseResolvers();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const testChannel = "test/channel";
+    const callback1 = vi.fn();
+    const callback2 = vi.fn();
+
+    socketManager.subscribe(testChannel, callback1);
+    socketManager.subscribe(testChannel, callback2);
+
+    socketServer.emit(testChannel, "test");
+
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(callback1).toHaveBeenCalled();
+    expect(callback2).toHaveBeenCalled();
+
+    callback1.mockClear();
+    callback2.mockClear();
+
+    socketManager.unsubscribe(testChannel);
+
+    socketServer.emit(testChannel, "test2");
+
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(callback1).not.toHaveBeenCalled();
+    expect(callback2).not.toHaveBeenCalled();
+  });
+
+  it("should handle socket connection error when onSocketConnectionError is provided", async () => {
+    const connectionErrorResolver = createPromiseResolvers<Error>();
+
+    // Use an invalid URL to trigger connection error
+    socketManager = new ClientSocketManager("http://invalid-host:9999", {
+      autoConnect: false,
+      eventHandlers: {
+        onSocketConnectionError(error) {
+          connectionErrorResolver.resolve(error);
+        },
+      },
+    });
+
+    // Manually connect to trigger the error
+    socketManager.connect();
+
+    const receivedError = await connectionErrorResolver.promise;
+
+    expect(receivedError).toBeInstanceOf(Error);
+  });
+
+  it("should handle subscription with already aborted signal", async () => {
+    const connectResolver = createPromiseResolvers();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const controller = new AbortController();
+
+    controller.abort(); // Abort before subscribing
+
+    const testCallback = vi.fn();
+
+    // This should trigger the `if (signal?.aborted) unsubscribe();` branch
+    socketManager.subscribe("test/channel", testCallback, {
+      signal: controller.signal,
+    });
+
+    // Emit to verify the callback was not registered
+    socketServer.emit("test/channel", "test");
+
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(testCallback).not.toHaveBeenCalled();
+  });
+
+  it("should handle subscription completion callback", async () => {
+    const connectResolver = createPromiseResolvers();
+    const subscriptionCompleteResolver = createPromiseResolvers<string>();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const testChannel = "test/completion";
+
+    socketManager.subscribe("test/completion", vi.fn(), {
+      onSubscriptionComplete(channel) {
+        subscriptionCompleteResolver.resolve(channel);
+      },
+    });
+
+    const completedChannel = await subscriptionCompleteResolver.promise;
+
+    expect(completedChannel).toBe(testChannel);
+  });
+
+  it("should handle operations when socket is null", () => {
+    socketManager = new ClientSocketManager("http://localhost:3000", {
+      autoConnect: false,
+    });
+
+    // @ts-expect-error setting private field for testing
+    socketManager._socket = null;
+
+    // Test id getter with null socket
+    expect(socketManager.id).toBe(null);
+
+    // Test subscribe with null socket
+    socketManager.subscribe("test", vi.fn());
+
+    // Test unsubscribe with null socket
+    socketManager.unsubscribe("test");
+
+    // Test emit with null socket
+    socketManager.emit("test", "data");
+  });
+
+  it("should handle manager setup when socket has no manager", () => {
+    socketManager = new ClientSocketManager("http://localhost:3000", {
+      autoConnect: false,
+    });
+
+    // Create a mock socket without manager
+    const mockSocket = {
+      io: null,
+      off: vi.fn(), // Add off method to prevent errors during cleanup
+    };
+
+    // @ts-expect-error setting private field for testing
+    socketManager._socket = mockSocket;
+
+    // @ts-expect-error calling private method for testing
+    socketManager._attachManagerEvents();
+
+    // Should not throw and should handle null manager gracefully
+    expect(true).toBe(true);
+
+    // Clean up properly by setting socket to null to avoid cleanup errors
+    // @ts-expect-error setting private field for testing
+    socketManager._socket = null;
+  });
+
+  it("should handle subscription without onAnySubscribedMessageReceived callback", async () => {
+    const connectResolver = createPromiseResolvers();
+
+    // Create socket manager without onAnySubscribedMessageReceived
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+        // Explicitly not providing onAnySubscribedMessageReceived
+      },
+    });
+
+    await connectResolver.promise;
+
+    const testCallback = vi.fn();
+
+    socketManager.subscribe("test/no-any-callback", testCallback);
+
+    // Emit message to trigger the listener
+    socketServer.emit("test/no-any-callback", "test message");
+
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 50);
+    });
+
+    // The specific callback should still be called
+    expect(testCallback).toHaveBeenCalledWith("test message");
+  });
+
+  it("should handle constructor with undefined options", () => {
+    socketManager = new ClientSocketManager("http://localhost:3000", undefined);
+    expect(socketManager).toBeDefined();
+  });
+
+  it("should handle _attachSocketEvents with null socket", () => {
+    socketManager = new ClientSocketManager("http://localhost:3000", {
+      autoConnect: false,
+    });
+
+    // @ts-expect-error setting private field for testing
+    socketManager._socket = null;
+
+    // @ts-expect-error calling private method for testing
+    socketManager._attachSocketEvents();
+
+    // Should not throw with null socket
+    expect(true).toBe(true);
+  });
+
+  it("should handle subscribe callback when socket becomes null", async () => {
+    const connectResolver = createPromiseResolvers();
+    const callback = vi.fn();
+
+    socketManager = new ClientSocketManager(socketServerUri, {
+      eventHandlers: {
+        onSocketConnection() {
+          connectResolver.resolve();
+        },
+      },
+    });
+
+    await connectResolver.promise;
+
+    const testChannel = "test/null-socket";
+
+    socketManager.subscribe(testChannel, callback);
+
+    // Get the internal listener before nullifying socket
+    // @ts-expect-error accessing private field for testing
+    const socket = socketManager._socket;
+    const listeners = socket?.listeners(testChannel);
+
+    // @ts-expect-error setting private field for testing
+    socketManager._socket = null;
+
+    // Manually trigger the listener to hit the null socket branch
+    listeners?.[0]?.("test");
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("should skip page events in non-browser environment", () => {
+    const originalDocument = global.document;
+
+    // @ts-expect-error mocking non-browser environment
+    delete global.document;
+
+    const tempManager = new ClientSocketManager("http://localhost:3000", {
+      autoConnect: false,
+    });
+
+    // @ts-expect-error calling private method for testing
+    expect(() => tempManager._attachPageEvents()).not.toThrow();
+    // @ts-expect-error calling private method for testing
+    expect(() => tempManager._detachPageEvents()).not.toThrow();
+
+    global.document = originalDocument;
   });
 });
