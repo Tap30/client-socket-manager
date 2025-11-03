@@ -53,5 +53,5 @@ export type SocketClientProviderProps = {
    * Optional flag indicating whether to use the stubbed version of
    * ClientSocketManager. This is useful for SSR or tests.
    */
-  shouldUseStob?: boolean;
+  shouldUseStub?: boolean;
 } & Partial<ClientSocketManagerOptions>;
