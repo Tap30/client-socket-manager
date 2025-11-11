@@ -6,7 +6,7 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 
 const app = express();
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
+
 const server = createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" },

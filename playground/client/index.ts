@@ -8,6 +8,7 @@ const socketManager = new ClientSocketManager("http://localhost:3000", {
     enabled: false,
     zIndex: 2000,
   },
+  transports: ["polling", "websocket"],
   eventHandlers: {
     onReconnectingError(err) {
       console.log("reconnecting error", err);
