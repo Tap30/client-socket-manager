@@ -26,7 +26,7 @@ const __SINGLETON_REFS__: Record<
  * Properties:
  * - `children` (`React.ReactNode`): React children to render within the provider.
  * - `uri` (`string`): The URI to connect the socket client to.
- * - `shouldUseStob?` (`boolean`): Optional flag indicating whether to use the stubbed version of `ClientSocketManager` (useful for SSR or testing).
+ * - `shouldUseStub?` (`boolean`): Optional flag indicating whether to use the stubbed version of `ClientSocketManager` (useful for SSR or testing).
  * - Additional props from `ClientSocketManagerOptions` can be provided, such as `eventHandlers`, `reconnectionDelay`, etc.
  *
  * @param props - Props for the provider, including connection URI, stub flag, and socket manager options.
@@ -34,7 +34,7 @@ const __SINGLETON_REFS__: Record<
  *
  * @example
  * ```tsx
- * <SocketClientProvider uri="https://example.com/socket" shouldUseStob={typeof window === "undefined"}>
+ * <SocketClientProvider uri="https://example.com/socket" shouldUseStub={typeof window === "undefined"}>
  *   <App />
  * </SocketClientProvider>
  * ```
@@ -58,7 +58,7 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
 
   useEffect(() => {
     if (!__SINGLETON_REFS__[uri]) {
-      if (props.shouldUseStob) {
+      if (props.shouldUseStub) {
         registerClientSocketManager(new ClientSocketManagerStub(uri, {}));
       } else {
         const client = new ClientSocketManager(uri, {

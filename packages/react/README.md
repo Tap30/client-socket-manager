@@ -18,6 +18,9 @@ connections using `socket.io-client`. It provides easy setup and management of
 socket connections with support for automatic reconnections, event handling, and
 visibility change management.
 
+> [!NOTE]
+> For detailed information about the core functionality and additional features, please refer to the [@tapsioss/client-socket-manager core package documentation](https://github.com/Tap30/client-socket-manager/blob/main/packages/core/README.md).
+
 ## Installation
 
 First, install the necessary dependencies:
