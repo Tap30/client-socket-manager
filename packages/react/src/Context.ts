@@ -1,9 +1,9 @@
-import * as React from "react";
+import { createContext } from "react";
 import type {
   ConnectionStatusValues,
   SocketInstance,
   SocketInstanceStub,
-} from "./types";
+} from "./types.ts";
 
 export type SocketContextValue = {
   /**
@@ -16,8 +16,6 @@ export type SocketContextValue = {
   connectionStatus: ConnectionStatusValues;
 };
 
-export const SocketContext = React.createContext<SocketContextValue | null>(
-  null,
-);
+export const SocketContext = createContext<SocketContextValue | null>(null);
 
 SocketContext.displayName = "SocketContext";

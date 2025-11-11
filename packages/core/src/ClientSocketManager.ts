@@ -1,6 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import { ManagerReservedEvents, SocketReservedEvents } from "./constants.ts";
-import * as devtool from "./devtool/devtool.ts";
+import { devtool } from "./devtool/index.ts";
 import type {
   ClientSocketManagerListenerOptions,
   ClientSocketManagerOptions,

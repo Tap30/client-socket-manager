@@ -1,18 +1,18 @@
 import {
-  ClientSocketManager as ClientSocketManagerOriginal,
+  ClientSocketManager,
   ClientSocketManagerStub,
 } from "@tapsioss/client-socket-manager";
-import * as React from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ConnectionStatus } from "./constants.ts";
 import { SocketContext, type SocketContextValue } from "./Context.ts";
 import type {
   ConnectionStatusValues,
   SocketClientProviderProps,
-} from "./types";
+} from "./types.ts";
 
 const __SINGLETON_REFS__: Record<
   string,
-  | InstanceType<typeof ClientSocketManagerOriginal>
+  | InstanceType<typeof ClientSocketManager>
   | InstanceType<typeof ClientSocketManagerStub>
   | null
 > = {};
@@ -42,12 +42,12 @@ const __SINGLETON_REFS__: Record<
 const SocketClientProvider = (props: SocketClientProviderProps) => {
   const { children, uri, ...options } = props;
 
-  const [clientInstance, setClientInstance] = React.useState(
+  const [clientInstance, setClientInstance] = useState(
     __SINGLETON_REFS__[uri] ?? null,
   );
 
   const [connectionStatus, setConnectionStatus] =
-    React.useState<ConnectionStatusValues>(ConnectionStatus.DISCONNECTED);
+    useState<ConnectionStatusValues>(ConnectionStatus.DISCONNECTED);
 
   const registerClientSocketManager = (
     client: SocketContextValue["socket"],
@@ -56,12 +56,12 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
     __SINGLETON_REFS__[uri] = client;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!__SINGLETON_REFS__[uri]) {
       if (props.shouldUseStob) {
         registerClientSocketManager(new ClientSocketManagerStub(uri, {}));
       } else {
-        const client = new ClientSocketManagerOriginal(uri, {
+        const client = new ClientSocketManager(uri, {
           ...options,
           eventHandlers: {
             ...(options.eventHandlers ?? {}),
@@ -104,16 +104,17 @@ const SocketClientProvider = (props: SocketClientProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const ctx = React.useMemo<SocketContextValue>(
-    () => ({
-      connectionStatus,
-      get socket() {
-        if (!clientInstance) return null;
-        if (clientInstance.disposed) return null;
+  const ctx: SocketContextValue = useMemo(
+    () =>
+      ({
+        connectionStatus,
+        get socket() {
+          if (!clientInstance) return null;
+          if (clientInstance.disposed) return null;
 
-        return clientInstance;
-      },
-    }),
+          return clientInstance;
+        },
+      }) satisfies SocketContextValue,
     [connectionStatus, clientInstance],
   );
 

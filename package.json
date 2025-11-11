@@ -10,24 +10,41 @@
     "changesets:apply": "changeset version",
     "changesets:status": "changeset status --since=main",
     "release": "pnpm build && changeset publish --tag latest",
-    "build": "wireit",
-    "test": "vitest",
+    "test": "pnpm -r --parallel run test",
+    "build": "pnpm -r run build",
+    "format:check": "wireit",
+    "format:write": "wireit",
     "lint": "wireit",
-    "dev": "pnpm --filter @repo/playground run dev",
-    "build:core": "wireit",
-    "build:react": "wireit"
+    "dev": "pnpm --filter @repo/playground run dev"
   },
   "wireit": {
-    "build": {
-      "dependencies": [
-        "build:core",
-        "build:react"
-      ]
+    "format:check": {
+      "command": "prettier . --check --cache",
+      "files": [
+        "./.prettierrc",
+        "./.prettierignore",
+        "**/*.{js,jsx,ts,tsx,md,json,css}",
+        "!**/dist/**/*",
+        "!pnpm-lock.yaml"
+      ],
+      "output": []
+    },
+    "format:write": {
+      "command": "prettier . --write --cache",
+      "files": [
+        "./.prettierrc",
+        "./.prettierignore",
+        "**/*.{js,jsx,ts,tsx,md,json,css}",
+        "!**/dist/**/*",
+        "!pnpm-lock.yaml"
+      ],
+      "output": []
     },
     "lint": {
       "dependencies": [
         "lint:ts",
-        "lint:ecma"
+        "lint:ecma",
+        "format:check"
       ]
     },
     "lint:ts": {
@@ -47,77 +64,50 @@
         "./eslint.config.js"
       ],
       "output": []
-    },
-    "build:react": {
-      "command": "pnpm --filter @tapsioss/react-client-socket-manager run build",
-      "files": [
-        "./packages/react/tsconfig.json",
-        "./packages/react/tsconfig.*.json",
-        "./packages/react/src/**/*",
-        "!./packages/react/src/**/*.test.{ts,tsx}"
-      ],
-      "output": [
-        "./packages/react/dist/**/*",
-        "./packages/react/dist/**/*.tsbuildinfo"
-      ],
-      "dependencies": [
-        "build:core"
-      ]
-    },
-    "build:core": {
-      "command": "pnpm --filter @tapsioss/client-socket-manager run build",
-      "files": [
-        "./packages/core/tsconfig.json",
-        "./packages/core/tsconfig.*.json",
-        "./packages/core/src/**/*",
-        "!./packages/react/src/**/*.test.{ts,tsx}"
-      ],
-      "output": [
-        "./packages/core/dist/**/*",
-        "./packages/core/dist/**/*.tsbuildinfo"
-      ]
     }
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
-    "@changesets/cli": "^2.29.4",
-    "@eslint/js": "^9.28.0",
-    "@lit/react": "^1.0.7",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@changesets/cli": "^2.29.5",
+    "@eslint/js": "^9.33.0",
+    "@lit/react": "^1.0.8",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.3",
-    "@types/node": "^20.19.0",
-    "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.5.1",
+    "@types/node": "^20.19.10",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "@vitest/eslint-plugin": "1.1.32-beta.3",
-    "eslint": "^9.28.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^9.1.2",
     "eslint-import-resolver-typescript": "^3.10.1",
     "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.4.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "express": "^4.21.2",
     "jsdom": "^26.1.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.5.3",
-    "prettier-plugin-organize-imports": "^4.1.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "shx": "^0.3.4",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.2",
+    "vitest": "^3.2.4",
     "wireit": "^0.14.12"
   }
 }

@@ -3,7 +3,6 @@ import type {
   ClientSocketManagerOptions,
   ClientSocketManagerStub,
 } from "@tapsioss/client-socket-manager";
-import type * as React from "react";
 import type { ConnectionStatus } from "./constants.ts";
 import type { SocketContextValue } from "./Context.ts";
 

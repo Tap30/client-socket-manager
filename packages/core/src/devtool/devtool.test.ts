@@ -1,6 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  DEVTOOL_CLOSE_ICON_ID,
   DEVTOOL_LOGS_SECTION_ID,
+  DEVTOOL_SOCKET_ICON_ID,
   DEVTOOL_WRAPPER_ID,
   LOG_CAPACITY,
   LogType,
@@ -155,4 +157,74 @@ describe("Devtool", () => {
 
     expect(newLogSection.scrollTop).toBe(scrollPosition);
   });
+
+  it("setZIndex applies the z-index on the wrapper element", () => {
+    devtool.dispose(); // ensures active = false and wrapper removed
+    const z = 424242;
+
+    devtool.setZIndex(z);
+    devtool.show();
+
+    const wrapper = devtool.getDevtoolWrapperElement();
+
+    expect(wrapper!.style.zIndex).toBe(`${z}`);
+  });
+
+  it("socket and close icons have correct initial opacity and toggle on click", () => {
+    devtool.dispose();
+    devtool.setZIndex(99999);
+    devtool.show();
+
+    const socketIcon = document.getElementById(DEVTOOL_SOCKET_ICON_ID)!;
+    const closeIcon = document.getElementById(DEVTOOL_CLOSE_ICON_ID)!;
+    const iconButton = devtool.getDevtoolIconElement()!;
+
+    // Initially: socketIcon has no opacity, closeIcon = 0
+    expect(socketIcon.style.opacity).toBe("");
+    expect(closeIcon.style.opacity).toBe("0");
+
+    // Click 1 → expands
+    iconButton.click();
+    expect(socketIcon.style.opacity).toBe("0");
+    expect(closeIcon.style.opacity).toBe("1");
+
+    // Click 2 → collapses
+    iconButton.click();
+    expect(socketIcon.style.opacity).toBe("1");
+    expect(closeIcon.style.opacity).toBe("0");
+  });
+
+  it("calling update() when the devtool is not active does not throw", () => {
+    // Ensure not active / not shown
+    devtool.hide();
+    expect(() => {
+      devtool.update(() => {});
+    }).not.toThrow();
+  });
+
+  it("does nothing if show() is called while already active", () => {
+    const wrapperBefore = devtool.getDevtoolWrapperElement();
+
+    expect(wrapperBefore).toBeTruthy();
+
+    // Spy on render or DOM manipulation — whichever happens in show()
+    const renderSpy = vi.spyOn(devtool, "renderDevtool");
+
+    // Call show() again — should hit the `if (active) return;`
+    devtool.show();
+
+    // Should not render again
+    expect(renderSpy).not.toHaveBeenCalled();
+
+    // Wrapper should remain the same (no new element)
+    const wrapperAfter = devtool.getDevtoolWrapperElement();
+
+    expect(wrapperAfter).toBe(wrapperBefore);
+
+    renderSpy.mockRestore();
+  });
+});
+
+it("throws if show() is called without setting zIndex", () => {
+  expect(() => devtool.show()).toThrowError(/No z-index was set/);
 });

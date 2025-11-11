@@ -172,7 +172,7 @@ export const renderLogs = () => {
     id: DEVTOOL_LOGS_SECTION_ID,
     style: generateInlineStyle({
       "max-height": "20rem",
-      overflow: "scroll",
+      overflow: "auto",
       "overscroll-behavior-y": "contain",
     }),
   });
@@ -279,7 +279,7 @@ export const updateInfoSection = () => {
     <div style="${devtoolInfoStyle}">
       ${renderStatus()}
       ${renderChannels()}
-      ${renderLogs()} 
+      ${renderLogs()}
     </div>
   `;
 
@@ -309,6 +309,7 @@ export const dispose = () => {
     s.logs.clear();
     s.status = Status.UNKNOWN;
   });
+  zIndex = NaN;
   hide();
 };
 
@@ -342,12 +343,6 @@ export const show = () => {
   active = true;
 
   const devtoolWrapper = document.createElement("div");
-
-  if (Number.isNaN(zIndex)) {
-    throw new Error("No z-index was set for the devtool.");
-  } else {
-    devtoolWrapper.style.zIndex = `${zIndex}`;
-  }
 
   if (Number.isNaN(zIndex)) {
     throw new Error("No z-index was set for the devtool.");
